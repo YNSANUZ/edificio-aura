@@ -9,7 +9,9 @@
    "status": "ativo",
    "entrou_em": "2026-11-26T14:50:26+00:00",
    "ultimo_aura": "2026-11-26T14:50:26+00:00",
-   "total_auras": 1
+   "total_auras": 1,
+   "regiao": "SE",
+   "regiao_auto": true
   }
  },
  "comentarios_vistos": [
@@ -34,5 +36,6 @@
    "usuario": "gatito.anime"
   }
  ],
- "top1": "gatito.anime"
+ "top1": "gatito.anime",
+ "curtidas_vistas": []
 }
