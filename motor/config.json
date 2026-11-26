@@ -1,0 +1,46 @@
+{
+  "horas_por_aura": 12,
+  "reajustes": {
+    "2026-11": 12,
+    "2026-12": 12
+  },
+  "intervalo_minimo_entre_auras_min": 180,
+  "saldo_inicial_horas": 240,
+  "saldo_maximo_horas": 720,
+  "carencia_horas": 72,
+  "pausa_noturna": [0, 0],
+  "fuso_horas": -3,
+  "alerta_quando_faltar_horas": 24,
+  "barra_cheia_horas": 240,
+  "ranking": "mes",
+  "ranking_janela_dias": 30,
+  "pracinha_dias": 30,
+  "personagens": 20,
+  "andares_por_bloco": 7,
+  "aptos_por_andar": 5,
+  "instagram": {
+    "api_base": "https://graph.instagram.com",
+    "posts_dos_ultimos_dias": 7,
+    "max_posts": 25,
+    "pausa_entre_chamadas_seg": 1.0,
+    "graph_facebook": "https://graph.facebook.com/v21.0",
+    "ig_user_id": "17841465361646062"
+  },
+  "bairros": [
+    ["Bairro Nobre", 2],
+    ["Centro", 6],
+    ["Vila", 0]
+  ],
+  "regioes": {"N": "Norte", "NE": "Nordeste", "CO": "Centro-Oeste", "SE": "Sudeste", "S": "Sul"},
+  "regiao_niveis": [1, 10, 50],
+  "brasas_por_aura": 10,
+  "moveis_marcos": {
+    "cama": [1, 10, 30, 60, 120],
+    "tapete": [3, 15, 40, 80, 150],
+    "sofa": [6, 20, 50, 100, 180],
+    "planta": [2, 12, 35, 70, 140],
+    "luminaria": [4, 18, 55, 110, 200],
+    "cortina": [5, 22, 65, 130, 220],
+    "quadro": [8, 25, 45, 90, 160]
+  }
+}

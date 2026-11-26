@@ -1,0 +1,10 @@
+motor/.env
+.env
+__pycache__/
+*.pyc
+motor/dados/estado.bak.json
+motor/dados/estado.tmp
+motor/dados/log.txt
+motor/dados/estado_simulacao.json
+site/img/
+site/index.html
