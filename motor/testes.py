@@ -160,6 +160,13 @@ class Regras(unittest.TestCase):
         self.assertEqual(M.ler_regiao("aura 7 sul"), "S")
         self.assertEqual(M.ler_regiao("AURA Centro-Oeste"), "CO")
         self.assertIsNone(M.ler_regiao("aura se liga nesse video muito bom"))
+        # estados (nome ou sigla) e DF, pela divisão do IBGE
+        for txt, reg in [("AURA DF", "CO"), ("aura brasília 🔥", "CO"), ("AURA BA", "NE"), ("aura Bahia!!", "NE"),
+                         ("AURA SP", "SE"), ("aura são paulo", "SE"), ("AURA rio grande do sul", "S"),
+                         ("AURA Rio Grande do Norte", "NE"), ("AURA Pará", "N"), ("aura 12 df", "CO"), ("AURA SE", "SE")]:
+            self.assertEqual(M.ler_regiao(txt), reg, txt)
+        for txt in ["aura para todos", "aura to aqui", "aura rio de rir kkk"]:
+            self.assertIsNone(M.ler_regiao(txt), txt)
         M.aplicar_lote(self.e, [c(1, "ana", "AURA NE", 0), c(2, "bia", "AURA", 0), c(3, "ana", "aura sul", 1)], T0 + timedelta(hours=2))
         self.assertEqual(self.e["moradores"]["ana"]["regiao"], "S")
         self.assertIsNone(self.e["moradores"]["bia"].get("regiao"))

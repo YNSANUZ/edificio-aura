@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import unicodedata
 import shutil
 import zlib
 from datetime import datetime, timedelta, timezone
@@ -137,23 +138,59 @@ def ler_comentario(texto: str):
     return True, num
 
 
-RE_REGIAO = re.compile(
-    r"(?<![a-z0-9])aura(?![a-z0-9])\s*#?\s*(?:\d{1,2})?\s*"
-    r"(norte|nordeste|centro[\s-]?oeste|sudeste|sul|ne|co|se)(?![a-zà-ú])", re.IGNORECASE)
-NOMES_REGIAO = {"norte": "N", "nordeste": "NE", "ne": "NE", "centrooeste": "CO", "co": "CO",
-                "sudeste": "SE", "se": "SE", "sul": "S"}
+# região pelo nome da região, pelo estado (nome ou sigla) ou pelo DF/Brasília — divisão oficial do IBGE
+_REGIOES_TXT = {
+    "N": "norte | acre ac | amapa ap | amazonas am | para pa | rondonia ro | roraima rr | tocantins to",
+    "NE": "nordeste ne | alagoas al | bahia ba | ceara ce | maranhao ma | paraiba pb | pernambuco pe | piaui pi"
+          " | rio grande do norte rn | sergipe",
+    "CO": "centro oeste centrooeste co | goias go | mato grosso mt | mato grosso do sul ms | distrito federal df | brasilia",
+    "SE": "sudeste se | espirito santo es | minas gerais minas mg | rio de janeiro rio rj | sao paulo sp",
+    "S": "sul | parana pr | rio grande do sul rs | santa catarina sc",
+}
+# SE = Sudeste (já era assim); Sergipe vale só pelo nome
+NOMES_REGIAO = {}
+for _cod, _txt in _REGIOES_TXT.items():
+    for _grupo in _txt.split("|"):
+        _ws = _grupo.split()
+        # cada grupo: nome por extenso (pode ter várias palavras) + sigla/apelidos de 1 palavra no fim
+        _sig = []
+        while len(_ws) > 1 and len(_ws[-1]) == 2:   # siglas ficam no fim do grupo
+            _sig.append(_ws.pop())
+        if len(_ws) == 1 and len(_ws[0]) == 2:
+            _sig, _ws = _ws, []
+        _nome = " ".join(_ws)
+        for chave in ([_nome] if _nome else []) + _sig:
+            NOMES_REGIAO[chave] = _cod
+NOMES_REGIAO.update({"minas": "SE", "rio": "SE", "centrooeste": "CO", "brasilia": "CO"})
+NOMES_REGIAO.pop("minas gerais minas", None); NOMES_REGIAO["minas gerais"] = "SE"
+NOMES_REGIAO.pop("rio de janeiro rio", None); NOMES_REGIAO["rio de janeiro"] = "SE"
+NOMES_REGIAO.pop("centro oeste centrooeste", None); NOMES_REGIAO["centro oeste"] = "CO"
+# palavras que também são palavras comuns: só valem se NADA de texto vier depois (ex.: "AURA PA" sim, "aura para todos" não)
+_CURTAS = {k for k in NOMES_REGIAO if len(k) == 2} | {"para", "rio", "minas"}
+_CHAVES = sorted(NOMES_REGIAO, key=len, reverse=True)
+_RE_AURA = re.compile(r"(?<![a-z0-9])aura(?![a-z0-9])\s*#?\s*(?:\d{1,2}(?!\d))?\s*(.*)$", re.S)
+
+
+def _sem_acento(t: str) -> str:
+    t = unicodedata.normalize("NFD", (t or "").lower())
+    return "".join(ch for ch in t if unicodedata.category(ch) != "Mn")
 
 
 def ler_regiao(texto: str):
-    """'AURA NE', 'aura 7 sul', 'AURA Centro-Oeste' -> código da região (N, NE, CO, SE, S) ou None.
-    Siglas curtas (NE, CO, SE) só valem em comentário curto, para 'aura se liga...' não mudar ninguém."""
-    m = RE_REGIAO.search(texto or "")
+    """'AURA NE', 'aura 7 sul', 'AURA Centro-Oeste', 'AURA BA', 'AURA DF', 'aura são paulo' -> N, NE, CO, SE, S ou None.
+    Siglas e palavras comuns (pa, se, rio, para...) só valem se não houver mais texto depois,
+    para 'aura se liga...' ou 'aura para todos' não mudarem ninguém."""
+    m = _RE_AURA.search(_sem_acento(texto))
     if not m:
         return None
-    chave = re.sub(r"[\s-]", "", m.group(1).lower())
-    if len(chave) == 2 and len((texto or "").strip()) > 24:
-        return None
-    return NOMES_REGIAO.get(chave)
+    resto = re.sub(r"[-_/.,!]+", " ", m.group(1)).strip()
+    for chave in _CHAVES:
+        if resto == chave or (resto.startswith(chave) and not resto[len(chave)].isalpha()):
+            depois = resto[len(chave):]
+            if chave in _CURTAS and re.search(r"[a-z]", depois):
+                return None
+            return NOMES_REGIAO[chave]
+    return None
 
 
 # ---------------------------------------------------------------- estado
@@ -446,8 +483,8 @@ def regras_texto(agora: datetime | None = None) -> list[str]:
         r.append(f"Seu apê começa vazio. Cada AURA também dá {c.get('brasas_por_aura', 10)} Brasas 🔥 e, conforme você "
                  "comenta, chegam móveis e decoração (cama, tapete, sofá, planta, luminária, cortina, quadro). Se for despejado, seus móveis vão no caminhão e voltam com você.")
     if c.get("regioes"):
-        r.append("Escolha sua região do Brasil Aura comentando AURA + a região (ex.: AURA NE, AURA SUL, "
-                 "AURA CENTRO-OESTE). Quem não escolher mora na Capital Aura. A região com mais AURAs no mês ganha a chama.")
+        r.append("Escolha sua região do Brasil Aura comentando AURA + a região ou o seu estado (ex.: AURA NE, AURA SUL, "
+                 "AURA BAHIA, AURA SP, AURA DF). Quem não escolher mora na Capital Aura. A região com mais AURAs no mês ganha a chama.")
     b = c.get("bairros")
     if b and len(b) >= 3:
         r.append(f"A Cidade Aura tem bairros: os blocos 1 a {b[0][1]} ficam no {b[0][0]}, lá no alto, "
