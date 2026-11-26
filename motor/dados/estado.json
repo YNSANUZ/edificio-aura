@@ -97,10 +97,11 @@
   "brunoleaod|gatito.anime|2026-11-26"
  ],
  "banco": {
-  "gatito.anime": "20|{\"cama\": 1, \"planta\": 1}|2966effa",
-  "brunoleaod": "10|{\"cama\": 1}|562273a9"
+  "gatito.anime": "20|{\"cama\": 1, \"planta\": 1}|2966effa|None",
+  "brunoleaod": "10|{\"cama\": 1}|562273a9|None"
  },
  "dm_enviadas": {
   "gatito.anime": "2026-11-26T19:01:10+00:00"
- }
+ },
+ "cargos": {}
 }
