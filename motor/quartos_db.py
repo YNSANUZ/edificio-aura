@@ -62,7 +62,9 @@ def linhas(estado: dict, segredo: str | None = None) -> list[dict]:
     for u, m in estado.get("moradores", {}).items():
         tot = m.get("total_auras", 0)
         sal, h = embaralhar(u, senha_de(u, segredo), segredo)
-        out.append({"u": u, "sal": sal, "senha_hash": h, "brasas_ganhas": tot * cfg,
+        import comunidade
+        out.append({"u": u, "sal": sal, "senha_hash": h, "brasas_ganhas": comunidade.brasas(m),
+                    "sindico_de": estado.get("cargos", {}).get(u),
                     "presentes": {k: v for k, v in M.moveis_de(tot).items() if v}})
     return out
 
@@ -75,7 +77,7 @@ def sincronizar(estado: dict) -> str:
     marcas = estado.setdefault("banco", {})
     novas = []
     for ln in linhas(estado, seg):
-        assinatura = f"{ln['brasas_ganhas']}|{json.dumps(ln['presentes'], sort_keys=True)}|{ln['senha_hash'][:8]}"
+        assinatura = f"{ln['brasas_ganhas']}|{json.dumps(ln['presentes'], sort_keys=True)}|{ln['senha_hash'][:8]}|{ln['sindico_de']}"
         if marcas.get(ln["u"]) != assinatura:
             novas.append((ln, assinatura))
     if not novas:

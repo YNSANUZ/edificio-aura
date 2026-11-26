@@ -66,7 +66,6 @@ def ciclo_real() -> None:
             log(msg_dm)
     except Exception as e:
         log(f"DM: não consegui enviar agora ({str(e)[:150]})")
-    M.salvar(estado)
     try:
         import quartos_db
         views = quartos_db.visualizacoes()
@@ -74,6 +73,7 @@ def ciclo_real() -> None:
         views = {}
         log(f"Banco: não consegui ler as visualizações ({str(e)[:120]})")
     dados = M.exportar(estado, agora, SITE, views)
+    M.salvar(estado)   # depois de exportar: guarda também os cargos (síndicos) calculados agora
     M.gravar_regras_md(REGRAS_MD, agora)
     log(f"{len(comentarios)} comentários lidos {resumo} | {dados['total_moradores']} moradores, "
         f"{dados['total_blocos']} blocos, top1 = {dados['vip']['u'] if dados['vip'] else '-'}")

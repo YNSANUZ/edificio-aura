@@ -20,9 +20,50 @@ class Regras(unittest.TestCase):
         self.e = M.estado_vazio()
         self._lota = M.CONFIG.get("despejo_so_quando_lota")
         M.CONFIG["despejo_so_quando_lota"] = False     # testes antigos: despejo pelo tempo
+        self._bonus = M.CONFIG.get("bonus_missao")
+        M.CONFIG["bonus_missao"] = 0                    # missão do dia não mexe nas contas dos testes antigos
 
     def tearDown(self):
         M.CONFIG["despejo_so_quando_lota"] = self._lota
+        if self._bonus is None: M.CONFIG.pop("bonus_missao", None)
+        else: M.CONFIG["bonus_missao"] = self._bonus
+
+    def test_bloco_nivel_melhorias_mutirao_cargos(self):
+        import comunidade as K
+        self.assertEqual(K.nivel_do_bloco(0)["nome"], "Kitnet")
+        self.assertEqual(K.nivel_do_bloco(12)["nome"], "Residencial")
+        self.assertEqual(K.nivel_do_bloco(35)["nome"], "Torre de luxo")
+        # 4 moradores no Sul: cobertura + 3 no bloco 1
+        coms = [c(i * 10 + k, u, "AURA SUL", k * 200) for i, (u, n) in enumerate([("ana", 4), ("bia", 3), ("caio", 2), ("duda", 1)]) for k in range(n)]
+        agora = T0 + timedelta(hours=14)
+        M.aplicar_lote(self.e, coms, agora)
+        with tempfile.TemporaryDirectory() as d:
+            dados = M.exportar(self.e, agora, Path(d))
+        info = dados["cidades"]["S"]["blocos"][0]["info"]
+        self.assertEqual((info["sindico"], info["sub"]), ("bia", "caio"))      # ana é a cobertura (top da região)
+        self.assertEqual(info["mutirao"]["feito"], 6)
+        self.assertEqual([x["falta"] for x in info["melhorias"]][0], 50 - 6)
+        self.assertEqual(self.e["cargos"]["bia"], "S-1")
+        self.assertEqual(dados["disputa_bairros"]["placar"]["Bairro Nobre"], 6)
+        self.assertEqual(dados["sindico_geral"], "ana")
+        self.assertEqual({z["titulo"] for z in dados["zeladores"]}, {"Mais pontual", "Mais ajudou no mutirão", "Morador veterano"})
+        # síndico sumido 48h: sub assume
+        depois = agora + timedelta(hours=60)
+        with tempfile.TemporaryDirectory() as d:
+            info = M.exportar(self.e, depois, Path(d))["cidades"]["S"]["blocos"][0]["info"]
+        self.assertEqual(info["sindico"], "bia")   # todos sumiram; sub (caio) também sumiu -> continua quem é 1º
+
+    def test_missao_do_dia_da_bonus_uma_vez(self):
+        import comunidade as K
+        M.CONFIG["bonus_missao"] = 20
+        dia = K.dia_local(T0)
+        tipo = K.missao_de(dia)[0]
+        textos = {"aura": "AURA", "boneco": "AURA 7", "regiao": "AURA NE", "duas": "AURA", "cedo": "AURA"}
+        M.aplicar_lote(self.e, [c(1, "ana", "AURA 7", 0), c(2, "ana", textos[tipo], 200)], T0 + timedelta(hours=4))
+        m = self.e["moradores"]["ana"]
+        if tipo != "cedo" or (T0 + timedelta(minutes=200)).astimezone(M.FUSO).hour < 12:
+            self.assertEqual(m.get("brasas_bonus"), 20)
+            self.assertEqual(K.brasas(m), 2 * 10 + 20)
 
     def test_despejo_so_quando_lota(self):
         M.CONFIG["despejo_so_quando_lota"] = True

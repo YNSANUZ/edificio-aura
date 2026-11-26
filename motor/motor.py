@@ -303,6 +303,9 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
     m["ultimo_aura"] = iso(quando)
     m["total_auras"] = m.get("total_auras", len(m["auras"]) - 1) + 1   # nunca é cortado (dá Brasas e móveis)
     m["status"] = "ativo"
+    import comunidade
+    if comunidade.conferir_missao(m, texto, quando):     # missão do dia (+Brasas, 1x por dia)
+        evento(estado, "missao", quando, usuario=usuario)
 
     if novo:
         evento(estado, "novo_morador", quando, usuario=usuario)
@@ -439,6 +442,7 @@ def bairro_do_bloco(n: int) -> str:
 
 
 def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None = None) -> dict:
+    import comunidade
     views = views or {}   # visualizações de cada quarto (vêm do banco; aparecem como 👁 no nome)
     rk = ranking(estado, agora)
     alerta = CONFIG["alerta_quando_faltar_horas"]
@@ -454,14 +458,17 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
                 "alerta": horas <= alerta,
                 "atrasado": pago <= agora,
                 **({"fila": True} if CONFIG.get("despejo_so_quando_lota") and momento_despejo(m) <= agora else {}),
-                "tot": tot, "br": tot * CONFIG.get("brasas_por_aura", 10),
+                "tot": tot, "br": comunidade.brasas(m),
+                **({"missao": True} if m.get("missao_dia") == comunidade.dia_local(agora).isoformat() else {}),
                 "mv": moveis_de(tot), "prox": list(prox) if prox else None,
                 "desde": m["entrou_em"][:10]}
 
     vip = ficha(*rk[0]) if rk else None
     por_bloco = CONFIG["andares_por_bloco"] * CONFIG["aptos_por_andar"]
 
-    def montar_cidade(nome, lista):
+    bairro_de_u, cargos = {}, {}
+
+    def montar_cidade(nome, lista, cod=""):
         """Cada região é uma cidade: o 1º do ranking da região mora na cobertura, o resto enche os blocos."""
         resto = lista[1:]
         n_blocos = max(1, -(-len(resto) // por_bloco))
@@ -469,13 +476,18 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
         for b in range(n_blocos):
             fatia = resto[b * por_bloco:(b + 1) * por_bloco]
             aptos = [ficha(*t) for t in fatia] + [None] * (por_bloco - len(fatia))
-            blocos.append({"numero": b + 1, "bairro": bairro_do_bloco(b + 1), "aptos": aptos})
+            info = comunidade.info_bloco(fatia, agora, b + 1)
+            for t in fatia:
+                bairro_de_u[t[0]] = bairro_do_bloco(b + 1)
+            if info["sindico"]:
+                cargos[info["sindico"]] = f"{cod}-{b + 1}"
+            blocos.append({"numero": b + 1, "bairro": bairro_do_bloco(b + 1), "aptos": aptos, "info": info})
         return {"nome": nome, "vip": ficha(*lista[0]) if lista else None, "total_moradores": len(lista),
                 "total_blocos": n_blocos if lista else 0, "blocos": blocos}
 
     cidades = {}
     for cod, nome in CONFIG.get("regioes", {}).items():
-        cidades[cod] = montar_cidade(nome, [t for t in rk if t[1].get("regiao") == cod])
+        cidades[cod] = montar_cidade(nome, [t for t in rk if t[1].get("regiao") == cod], cod)
     n_blocos = max(1, sum(c["total_blocos"] for c in cidades.values()))
 
     # com despejo só quando lota, o relógio mostra quando o próximo morador entra na fila (quem já está na fila não conta)
@@ -507,6 +519,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
                           "t": max(m["entrou_em"], m["ultimo_aura"] or "")})
     praca.sort(key=lambda x: x["t"], reverse=True)
     praca = [{k: v for k, v in x.items() if k != "t"} for x in praca[:40]]
+    estado["cargos"] = cargos
 
     niveis = CONFIG.get("regiao_niveis", [1, 10, 50])
     regioes = {}
@@ -531,6 +544,11 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
         "saldo_maximo_horas": CONFIG.get("barra_cheia_horas", teto),
         "regras_dias_gratis": round(CONFIG["saldo_inicial_horas"] / 24),
         "praca": praca,
+        "disputa_bairros": comunidade.disputa_bairros(estado, agora, bairro_de_u),
+        "zeladores": comunidade.zeladores(estado, agora),
+        "missao_hoje": dict(zip(("tipo", "texto"), comunidade.missao_de(comunidade.dia_local(agora))),
+                            bonus=comunidade.cfg("bonus_missao", comunidade.BONUS_MISSAO)),
+        "sindico_geral": rk[0][0] if rk else None,
         "vip": vip,
         "ranking": [{"u": u, "p": m["personagem"], "r": m.get("regiao"), "n": n} for u, m, n in rk[:100]],
         "ranking_semana": ranking_semana(estado, agora)[:100],
@@ -588,6 +606,13 @@ def regras_texto(agora: datetime | None = None) -> list[str]:
     if c.get("regioes"):
         r.append("Escolha sua região do Brasil Aura comentando AURA + a região ou o seu estado (ex.: AURA NE, AURA SUL, "
                  "AURA BAHIA, AURA SP, AURA DF). Quem não escolher entra sozinho na região com menos moradores e pode trocar quando quiser. A região com mais AURAs no mês ganha a chama.")
+    r.append("Cada bloco sobe de nível com mais moradores (Kitnet, Residencial, Condomínio, Torre de luxo) e libera melhorias "
+             "(portaria, elevador, piscina, academia, heliponto) com os AURAs de todos os vizinhos. Toda semana tem mutirão: "
+             "batendo a meta de AURAs do bloco, sai a obra da semana.")
+    r.append("O 1º do bloco no mês é o síndico e o 2º é o subsíndico (se o síndico sumir 48h, o sub assume); o síndico escolhe o "
+             "lema do bloco numa lista pronta. O Top 1 do Brasil é o Síndico Geral. Toda semana saem os zeladores: mais pontual, "
+             "quem mais ajudou no mutirão e o morador veterano.")
+    r.append(f"Todo dia tem uma missão simples, feita comentando AURA: cumprindo, você ganha {c.get('bonus_missao', 20)} Brasas a mais (1 vez por dia).")
     if c.get("horas_por_curtida") and c.get("banco_ligado"):   # só aparece quando a lojinha/senha estiver no ar
         r.append(f"Quem entra com @ e senha pode visitar quartos e curtir: cada curtida no seu quarto paga "
                  f"{_tempo(c['horas_por_curtida'])} de aluguel (até {_tempo(c['horas_por_curtida'] * c.get('curtidas_pagas_max_dia', 18))} por dia), "
