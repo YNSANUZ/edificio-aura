@@ -285,6 +285,33 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
     return "pagou"
 
 
+def creditar_curtidas(estado: dict, curtidas: list[dict], agora: datetime) -> int:
+    """Curtidas de visitantes no quarto (vindas do banco) pagam horas de aluguel do dono.
+    Cada curtida conta 1 vez (chave dono|visitante|dia); o banco já marca paga=false acima do limite do dia."""
+    horas = CONFIG.get("horas_por_curtida", 0)
+    if not horas:
+        return 0
+    vistas = estado.setdefault("curtidas_vistas", [])
+    ja = set(vistas)
+    n = 0
+    for c in curtidas:
+        chave = f"{c.get('dono')}|{c.get('visitante')}|{c.get('dia')}"
+        if chave in ja or not c.get("paga", True):
+            continue
+        ja.add(chave); vistas.append(chave)
+        m = estado["moradores"].get(str(c.get("dono", "")).lower())
+        if not m or m.get("status") == "despejado":
+            continue
+        quando = min(de_iso(c["quando"]), agora) if c.get("quando") else agora
+        base = max(de_iso(m["pago_ate"]), quando)
+        teto = avancar(quando, CONFIG["saldo_maximo_horas"])
+        m["pago_ate"] = iso(min(avancar(base, horas), teto))
+        m["curtidas"] = m.get("curtidas", 0) + 1
+        n += 1
+    estado["curtidas_vistas"] = vistas[-20000:]
+    return n
+
+
 def atualizar(estado: dict, agora: datetime) -> list[str]:
     """Despeja quem ficou sem saldo e recalcula o top 1. Retorna os despejados."""
     despejados = []
@@ -485,6 +512,11 @@ def regras_texto(agora: datetime | None = None) -> list[str]:
     if c.get("regioes"):
         r.append("Escolha sua região do Brasil Aura comentando AURA + a região ou o seu estado (ex.: AURA NE, AURA SUL, "
                  "AURA BAHIA, AURA SP, AURA DF). Quem não escolher mora na Capital Aura. A região com mais AURAs no mês ganha a chama.")
+    if c.get("horas_por_curtida") and c.get("banco_ligado"):   # só aparece quando a lojinha/senha estiver no ar
+        r.append(f"Quem entra com @ e senha pode visitar quartos e curtir: cada curtida no seu quarto paga "
+                 f"{_tempo(c['horas_por_curtida'])} de aluguel (até {_tempo(c['horas_por_curtida'] * c.get('curtidas_pagas_max_dia', 18))} por dia), "
+                 f"e quem curte ganha {c.get('brasas_por_visita', 1)} Brasa por curtida (até {c.get('visitas_brasas_max_dia', 10)} por dia). "
+                 "Vale 1 curtida por quarto por dia.")
     b = c.get("bairros")
     if b and len(b) >= 3:
         r.append(f"A Cidade Aura tem bairros: os blocos 1 a {b[0][1]} ficam no {b[0][0]}, lá no alto, "

@@ -51,6 +51,9 @@ def ciclo_real() -> None:
     resumo = M.aplicar_lote(estado, comentarios, agora)
     try:  # Brasas e móveis de presente vão para o banco da lojinha (se já estiver configurado)
         import quartos_db
+        n_curt = M.creditar_curtidas(estado, quartos_db.curtidas_novas(estado), agora)
+        if n_curt:
+            log(f"{n_curt} curtida(s) em quartos viraram aluguel")
         msg_banco = quartos_db.sincronizar(estado)
         if "pulei" not in msg_banco and "em dia" not in msg_banco:
             log(msg_banco)

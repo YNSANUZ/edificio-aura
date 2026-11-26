@@ -16,6 +16,7 @@ import hashlib
 import hmac
 import json
 import os
+import urllib.parse
 import urllib.request
 
 import motor as M
@@ -92,3 +93,17 @@ def sincronizar(estado: dict) -> str:
         for ln, a in lote:
             marcas[ln["u"]] = a
     return f"banco: {len(novas)} morador(es) atualizado(s)"
+
+
+def curtidas_novas(estado: dict) -> list[dict]:
+    """Curtidas pagas dos últimos 2 dias (o motor ignora as que já contou)."""
+    url, chave = _env("SUPABASE_URL"), _env("SUPABASE_SERVICE_KEY")
+    if not (url and chave):
+        return []
+    from datetime import timedelta
+    desde = M.iso(M.agora_utc() - timedelta(days=2))
+    q = ("/rest/v1/curtidas?select=dono,visitante,dia,quando,paga&paga=is.true&order=quando.asc&limit=10000"
+         "&quando=gte." + urllib.parse.quote(desde))
+    req = urllib.request.Request(url.rstrip("/") + q, headers={"apikey": chave, "Authorization": "Bearer " + chave})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return json.loads(r.read().decode())

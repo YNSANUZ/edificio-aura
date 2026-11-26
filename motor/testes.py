@@ -198,6 +198,18 @@ class Regras(unittest.TestCase):
         self.assertEqual([(x["u"], x["n"]) for x in sem], [("ana", 3), ("bia", 1)])
         self.assertEqual(M.ranking_semana(self.e, T0 + timedelta(days=9)), [])   # passou a semana, zera
 
+    def test_curtidas_pagam_aluguel_do_dono(self):
+        M.aplicar_lote(self.e, [c(1, "ana", "AURA", 0)], T0)
+        antes = M.de_iso(self.e["moradores"]["ana"]["pago_ate"])
+        cur = [{"dono": "ana", "visitante": v, "dia": "2026-11-01", "quando": M.iso(T0 + timedelta(hours=1)), "paga": True}
+               for v in ("bia", "caio")]
+        cur.append({"dono": "ana", "visitante": "duda", "dia": "2026-11-01", "quando": M.iso(T0), "paga": False})  # acima do limite
+        cur.append({"dono": "ninguem", "visitante": "bia", "dia": "2026-11-01", "quando": M.iso(T0), "paga": True})
+        self.assertEqual(M.creditar_curtidas(self.e, cur, T0 + timedelta(hours=2)), 2)
+        h = M.CONFIG["horas_por_curtida"]
+        self.assertEqual(M.de_iso(self.e["moradores"]["ana"]["pago_ate"]), M.avancar(antes, 2 * h))
+        self.assertEqual(M.creditar_curtidas(self.e, cur, T0 + timedelta(hours=3)), 0)   # não conta de novo
+
     def test_senha_do_quarto(self):
         import hashlib, quartos_db as Q
         s1, s2 = Q.senha_de("Ana", "segredo-teste"), Q.senha_de("ana", "segredo-teste")

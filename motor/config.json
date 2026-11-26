@@ -106,5 +106,10 @@
       90,
       160
     ]
-  }
+  },
+  "horas_por_curtida": 2,
+  "curtidas_pagas_max_dia": 18,
+  "brasas_por_visita": 1,
+  "visitas_brasas_max_dia": 10,
+  "banco_ligado": false
 }
