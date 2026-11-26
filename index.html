@@ -1075,7 +1075,7 @@ const BANCO=window.AURA_BANCO||{};
 const Casa={
   /* modo teste só no PC (localhost) ou com ?lojasim; no site público sem banco o botão nem aparece */
   simulado:params.has('lojasim')||(!BANCO.url&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)),
-  get ligada(){ return !!BANCO.url||this.simulado; },
+  get ligada(){ return (!!BANCO.url&&BANCO.login!==false)||this.simulado; },   /* login/lojinha/curtidas */
   sessao:null,
   async rpc(fn,args){
     if(this.simulado) return this.sim(fn,args);
@@ -1175,7 +1175,7 @@ const statsCache={};
 const fmtNum=n=>n>=1e6?(n/1e6).toFixed(1).replace('.0','').replace('.',',')+' mi':n>=1e3?(n/1e3).toFixed(1).replace('.0','').replace('.',',')+' mil':String(n||0);
 function viewsDe(u){ if(statsCache[u]) return statsCache[u].views||0; const a=acharMorador(u); return (a&&a.m.v)||((D.praca||[]).find(x=>x.u===u)||{}).v||0; }
 async function contarVisualizacao(dono){
-  if(!Casa.ligada||(Casa.sessao&&Casa.sessao.u===dono)) return pedirStats(dono);
+  if(!(BANCO.url||Casa.simulado)||(Casa.sessao&&Casa.sessao.u===dono)) return pedirStats(dono);
   let ult=0; try{ ult=+localStorage.getItem('aura_v_'+dono)||0; }catch(e){}
   const conta=Date.now()-ult>3600e3;            // este aparelho conta 1 vez por hora por quarto
   try{ if(conta) localStorage.setItem('aura_v_'+dono,Date.now()); }catch(e){}
