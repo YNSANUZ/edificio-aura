@@ -37,5 +37,8 @@
   }
  ],
  "top1": "gatito.anime",
- "curtidas_vistas": []
+ "curtidas_vistas": [],
+ "banco": {
+  "gatito.anime": "10|{\"cama\": 1}|2966effa"
+ }
 }
