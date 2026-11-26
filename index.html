@@ -356,6 +356,15 @@
   .ficha .dicas p>span:first-child{flex:0 0 22px; font-size:17px; text-align:center}
   .ficha .dicas p>span+span{flex:1}
   .ficha .dicas button{margin-left:4px; border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 12.5px 'Baloo 2',sans-serif; padding:0 8px; cursor:pointer; color:var(--carvao)}
+  /* Novidades: 1 cartãozinho discreto (só 1 vez por novidade), o resto fica no botão dentro das Regras */
+  .novCard{position:fixed; left:50%; bottom:92px; transform:translateX(-50%); z-index:70; width:min(420px,calc(100% - 24px));
+        background:#fff8ee; border:3px solid var(--carvao); border-radius:16px; padding:6px 10px; display:flex; gap:8px; align-items:center;
+        box-shadow:0 4px 0 var(--carvao); animation:pula .4s cubic-bezier(.3,1.6,.5,1); font-weight:700; font-size:13.5px}
+  .novCard[hidden]{display:none}
+  .novCard b{font-size:14px} .novCard .txt{flex:1; line-height:1.25}
+  .novCard button{border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 13px 'Baloo 2',sans-serif; padding:1px 8px; cursor:pointer; color:var(--carvao)}
+  .novCard button.x{background:#fff}
+  .btNovidades{border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 13px 'Baloo 2',sans-serif; padding:1px 10px; cursor:pointer; margin:0 0 6px; color:var(--carvao)}
   .galeria{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
   .galeria button{border:2px solid var(--carvao); border-radius:12px; background:#fff; padding:2px 2px 0; cursor:pointer; font:800 13px 'Baloo 2',sans-serif; color:var(--carvao)}
   .galeria button.bonecoAtual{background:var(--amarelo)}
@@ -612,6 +621,7 @@
   <div class="caixa">
     <button class="fechar" id="fechar" aria-label="fechar">✕</button>
     <h2>📜 Regras do Edifício Aura</h2>
+    <button class="btNovidades" id="abrirNovidades">🆕 O que mudou</button>
     <ol id="listaRegras" class="linhas"></ol>
   </div>
 </div>
@@ -1185,6 +1195,32 @@ document.getElementById('lojaGuardar').onclick=()=>lojaAcao('usar',0);
 document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja').hidden=true;
 function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); if(praca3d) base3d(); }
 document.getElementById('lojaSair').onclick=sairLoja;
+
+/* ===== Novidades ===== */
+const NOVIDADES=[   /* a 1ª é a mais nova; troque o "id" quando tiver novidade nova */
+  {id:'2611c', data:'26/11', itens:[['🌳','Praça no meio do mapa: veja quem chegou agora andando por lá'],['👁','Contador de visualizações em cada quarto'],
+    ['🧍','Galeria dos 20 bonecos: escolha o seu e comente AURA + número'],['🗺️','Escolha sua região pelo estado: AURA SP, AURA BA, AURA DF']]},
+  {id:'2611b', data:'26/11', itens:[['🎁','30 dias de aluguel grátis pra quem chega'],['💸','Cada AURA agora paga 36h de aluguel']]},
+];
+function abrirNovidades(){
+  document.getElementById('modal').hidden=true;
+  document.getElementById('bvTexto').innerHTML=`<h2>🆕 O que mudou</h2>`+NOVIDADES.map(n=>`<p style="margin:8px 0 2px"><b>${n.data}</b></p>`
+    +`<ul class="bvLinhas">${n.itens.map(([e,t])=>`<li><span>${e}</span><div>${t}</div></li>`).join('')}</ul>`).join('');
+  document.getElementById('boasVindas').hidden=false;
+}
+document.getElementById('abrirNovidades').onclick=abrirNovidades;
+function cartaoNovidade(){
+  const n=NOVIDADES[0]; let visto=''; try{ visto=localStorage.getItem('aura_nov')||''; }catch(e){}
+  if(visto===n.id||params.has('cartao')||params.has('semnovidade')) return;
+  const c=document.createElement('div'); c.className='novCard'; c.setAttribute('role','status');
+  c.innerHTML=`<span style="font-size:22px">🆕</span><div class="txt"><b>Novidade!</b> ${n.itens[0][1]}</div><button id="novVer">ver</button><button class="x" id="novX" aria-label="fechar">✕</button>`;
+  document.body.appendChild(c);
+  const fecha=()=>{ c.remove(); try{ localStorage.setItem('aura_nov',n.id); }catch(e){} };
+  document.getElementById('novX').onclick=fecha;
+  document.getElementById('novVer').onclick=()=>{ fecha(); abrirNovidades(); };
+}
+/* só mostra quando nenhum outro aviso está aberto (no máximo 1 aviso por vez) */
+setTimeout(()=>{ if(document.getElementById('boasVindas').hidden&&document.getElementById('modal').hidden) cartaoNovidade(); },2500);
 
 /* ===== Galeria dos 20 bonecos: toca num e aparece "comente AURA N" ===== */
 function abrirGaleria(atual){
