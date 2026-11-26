@@ -1087,10 +1087,13 @@ const ERROS={NAO_MORA:'Esse @ ainda não mora no prédio. Comente AURA num post 
   BLOQUEADO:'Muitas tentativas erradas. Este quarto ficou trancado por um tempo — tente de novo mais tarde.',SEM_BRASAS:'Faltam Brasas. Comente AURA pra ganhar mais 🔥',
   JA_TEM:'Você já tem essa peça.',PROPRIO:'Esse é o seu quarto 😉',REACAO:'Reação inválida.',NAO_TEM:'Você ainda não tem essa peça.',REDE:'Sem conexão agora. Tente de novo em instantes.'};
 const BANCO=window.AURA_BANCO||{};
+/* modo teste: nexo.yt/?teste liga o botão Entrar NESTE aparelho (fica lembrado) mesmo com login:false; ?semteste desliga */
+const modoTeste=(()=>{ try{ if(params.has('teste')) localStorage.setItem('aura_teste','1'); if(params.has('semteste')) localStorage.removeItem('aura_teste');
+  return !!localStorage.getItem('aura_teste'); }catch(e){ return params.has('teste'); } })();
 const Casa={
   /* modo teste só no PC (localhost) ou com ?lojasim; no site público sem banco o botão nem aparece */
   simulado:params.has('lojasim')||(!BANCO.url&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)),
-  get ligada(){ return (!!BANCO.url&&BANCO.login!==false)||this.simulado; },   /* login/lojinha/curtidas */
+  get ligada(){ return (!!BANCO.url&&(BANCO.login!==false||modoTeste))||this.simulado; },   /* login/lojinha/curtidas */
   sessao:null,
   async rpc(fn,args){
     if(this.simulado) return this.sim(fn,args);
