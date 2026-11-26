@@ -728,6 +728,7 @@ document.getElementById('prox').onclick=e=>{e.preventDefault(); if(blocoAtual<nB
 /* relógio: tempo até o próximo despejo previsto */
 function tique(){
   const el=document.getElementById('relogio');
+  document.getElementById('relogioTitulo').textContent=D.despejo_so_quando_lota?(D.na_fila?`NA FILA DO DESPEJO: ${D.na_fila}`:'PRÓXIMO ATRASO EM'):'PRÓXIMO DESPEJO EM';
   if(!D.proximo_despejo){ el.textContent='--:--:--'; return; }
   const s=Math.max(0,Math.floor((new Date(D.proximo_despejo)-Date.now())/1000));
   el.textContent=[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':');
@@ -1019,8 +1020,9 @@ function abrirApe(nome,silencioso){
   q+=`<div class="eu"><img ${vivo(m.u)} src="img/corpo${m.p}.png" alt="personagem de @${esc(m.u)}"></div>`;
   q+=`<div class="placaNome">@${esc(m.u)}${viewsDe(m.u)?` 👁 ${fmtNum(viewsDe(m.u))}`:''}</div>`;
   if(!Object.values(mv).some(Boolean)) q+=`<div class="vazioApe">apê vazio · comente AURA pra ganhar móveis</div>`;
-  if(m.atrasado) q+=`<div class="faixa">⚠️ ATRASADO · comente AURA antes do caminhão chegar!</div>`;
-  else if(m.alerta) q+=`<div class="faixa laranja">⏳ VENCENDO · falta ${fmtTempo(m)} de aluguel</div>`;
+  if(m.fila) q+=`<div class="faixa">🚚 NA FILA DO DESPEJO · sai quando chegar vizinho novo. Comente AURA!</div>`;
+  else if(m.atrasado) q+=`<div class="faixa">⚠️ ATRASADO · comente AURA antes do caminhão chegar!</div>`;
+  else if(m.alerta&&!m.atrasado) q+=`<div class="faixa laranja">⏳ VENCENDO · falta ${fmtTempo(m)} de aluguel</div>`;
   const Q=document.getElementById('quarto'); Q.innerHTML=q; Q.classList.toggle('atrasado',!!m.atrasado);
   montarVisita(Q,m);
   const pos=(D.ranking||[]).findIndex(x=>x.u===m.u);
