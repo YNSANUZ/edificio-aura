@@ -86,11 +86,12 @@ def enviar(comment_id: str, msg: str) -> dict:
     ig_id = M.CONFIG.get("instagram", {}).get("ig_user_id", "")
     tok = _env("IG_DM_TOKEN")
     if tok:
-        return _post(f"https://graph.instagram.com/v21.0/{ig_id}/messages", tok, corpo)
-    tok = _env("PAGE_TOKEN")
+        return _post("https://graph.instagram.com/v21.0/me/messages", tok, corpo)   # "me" = a conta dona do token
+    # login unificado: o próprio token do motor (EAB…, com instagram_manage_messages) manda a resposta privada
+    tok = _env("PAGE_TOKEN") or _env("IG_TOKEN")
     if tok:
         return _post(f"https://graph.facebook.com/v21.0/{ig_id}/messages", tok, corpo)
-    raise RuntimeError("sem token de mensagens (IG_DM_TOKEN ou PAGE_TOKEN)")
+    raise RuntimeError("sem token de mensagens (IG_TOKEN)")
 
 
 def pendentes(estado: dict, agora) -> list[tuple[str, dict]]:
