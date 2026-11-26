@@ -755,7 +755,8 @@ document.getElementById('valor').onclick=abrirRegras;
 document.getElementById('fechar').onclick=()=>document.getElementById('modal').hidden=true;
 document.getElementById('modal').onclick=e=>{ if(e.target.id==='modal') e.target.hidden=true; };
 if(params.has('regras')) window.addEventListener('load',()=>abrirRegras());
-document.getElementById('busca').addEventListener('submit',e=>{e.preventDefault(); document.getElementById('q').blur(); buscar(document.getElementById('q').value);});
+let donoBusca='';   /* quem digitou o próprio @ na busca é (provavelmente) o dono: só ele vê a boas-vindas */
+document.getElementById('busca').addEventListener('submit',e=>{e.preventDefault(); document.getElementById('q').blur(); donoBusca=(document.getElementById('q').value||'').trim().replace(/^@/,'').toLowerCase(); buscar(document.getElementById('q').value);});
 
 /* atualiza sozinho: recarrega dados.js a cada 60 s */
 function recarregar(){
@@ -1026,6 +1027,8 @@ function abrirApe(nome,silencioso){
 }
 /* boas-vindas: só na 1ª vez que a pessoa abre o próprio apê neste aparelho, enquanto ainda está nos dias grátis */
 function boasVindas(m){
+  const dono=donoBusca===m.u||(Casa.sessao&&Casa.sessao.u===m.u);
+  if(!dono) return boasVindasVisita(m);
   const dias=(Date.now()-new Date(m.desde+'T12:00:00'))/864e5, gratis=Math.round((D.regras_dias_gratis||10));
   if(!(dias<gratis)) return;
   let visto=false; try{ visto=!!localStorage.getItem('aura_bv_'+m.u); localStorage.setItem('aura_bv_'+m.u,'1'); }catch(e){}
@@ -1035,6 +1038,20 @@ function boasVindas(m){
     ['⏱️','Vale <b>1 AURA a cada 3 horas</b>'],['🔥','Cada AURA dá <b>10 Brasas</b>'],['🛋️','Com as Brasas você compra móveis pro seu apê']];
   if(Casa.ligada) lin.push(['🔑','A senha do seu quarto chega na sua <b>DM</b>']);
   document.getElementById('bvTexto').innerHTML=`<h2>🎉 Bem-vindo, @${esc(m.u)}!</h2><p>🎁 Você ganhou</p><div class="grande">${gratis} dias grátis</div>`
+    +`<ul class="bvLinhas">${lin.map(([e,t])=>`<li><span>${e}</span><div>${t}</div></li>`).join('')}</ul>`;
+  document.getElementById('boasVindas').hidden=false;
+}
+/* quem abre o quarto de OUTRA pessoa (janela, praça, ranking, link): instrução de visitante, 1 vez por aparelho */
+function boasVindasVisita(m){
+  let visto=false; try{ visto=!!localStorage.getItem('aura_bv_visita'); localStorage.setItem('aura_bv_visita','1'); }catch(e){}
+  if(visto) return;
+  const lin=[['🏠',`Este é o quarto de <b>@${esc(m.u)}</b>`],['❤️','Você pode deixar uma curtida pro morador'],
+    ['💸','Cada curtida paga uma parte do aluguel dele'],['🔑','Pra interagir, entre com seu @ e sua senha'],
+    ['📝','Ainda não tem cadastro? Siga o <b>@comenteaura</b> e comente <b>AURA</b> em qualquer post do Instagram'],
+    ['📩','A senha do seu quarto chega nas <b>mensagens do seu Insta</b>']];
+  if(!Casa.ligada) lin.splice(1,3,['🏆','Quem comenta mais AURA mora mais alto']);   /* curtidas e senha só depois do banco ligado */
+  if(!Casa.ligada) lin.splice(lin.length-1,1,['🎁','Quem chega ganha 30 dias de aluguel grátis']);
+  document.getElementById('bvTexto').innerHTML=`<h2>👀 Você está visitando</h2><div class="grande" style="font-size:30px">@${esc(m.u)}</div>`
     +`<ul class="bvLinhas">${lin.map(([e,t])=>`<li><span>${e}</span><div>${t}</div></li>`).join('')}</ul>`;
   document.getElementById('boasVindas').hidden=false;
 }
