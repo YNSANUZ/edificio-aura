@@ -18,6 +18,30 @@ def c(i, u, txt, minutos):
 class Regras(unittest.TestCase):
     def setUp(self):
         self.e = M.estado_vazio()
+        self._lota = M.CONFIG.get("despejo_so_quando_lota")
+        M.CONFIG["despejo_so_quando_lota"] = False     # testes antigos: despejo pelo tempo
+
+    def tearDown(self):
+        M.CONFIG["despejo_so_quando_lota"] = self._lota
+
+    def test_despejo_so_quando_lota(self):
+        M.CONFIG["despejo_so_quando_lota"] = True
+        M.aplicar_lote(self.e, [c(1, "ana", "AURA SUL", 0), c(2, "bia", "AURA SUL", 30)], T0 + timedelta(hours=1))
+        longe = M.momento_despejo(self.e["moradores"]["ana"]) + timedelta(days=5)
+        self.assertEqual(M.atualizar(self.e, longe), [])                       # passou da tolerância e continua morando
+        self.assertEqual(self.e["moradores"]["ana"]["status"], "ativo")
+        with tempfile.TemporaryDirectory() as d:
+            f = M.exportar(self.e, longe, Path(d))["cidades"]["S"]
+        self.assertTrue(all(m.get("fila") for b in f["blocos"] for m in b["aptos"] if m) and f["vip"]["fila"])
+        # chega vizinho novo: sai o atrasado mais antigo (ana chegou antes)
+        minutos = int((longe - T0).total_seconds() // 60)
+        M.aplicar_lote(self.e, [c(3, "caio", "AURA SUL", minutos)], longe)
+        self.assertEqual(self.e["moradores"]["ana"]["status"], "despejado")
+        self.assertEqual(self.e["moradores"]["bia"]["status"], "ativo")
+        self.assertEqual(self.e["moradores"]["caio"]["status"], "ativo")
+        # ana comenta de novo: volta
+        M.aplicar_lote(self.e, [c(4, "ana", "AURA", minutos + 30)], longe + timedelta(hours=1))
+        self.assertEqual(self.e["moradores"]["ana"]["status"], "ativo")
 
     def test_le_aura_e_numero(self):
         self.assertEqual(M.ler_comentario("AURA 7"), (True, 7))

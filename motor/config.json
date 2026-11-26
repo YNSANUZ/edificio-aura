@@ -119,5 +119,6 @@
       "gatito.anime"
     ],
     "max_por_ciclo": 20
-  }
+  },
+  "despejo_so_quando_lota": true
 }

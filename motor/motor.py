@@ -306,6 +306,8 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
 
     if novo:
         evento(estado, "novo_morador", quando, usuario=usuario)
+        if CONFIG.get("despejo_so_quando_lota"):
+            abrir_vaga(estado, usuario, quando)
         return "novo"
     if voltou:
         evento(estado, "voltou", quando, usuario=usuario)
@@ -340,10 +342,33 @@ def creditar_curtidas(estado: dict, curtidas: list[dict], agora: datetime) -> in
     return n
 
 
+def na_fila(m: dict, agora: datetime) -> bool:
+    """Passou do crédito E da tolerância: perde o apê para o próximo vizinho novo."""
+    return m["status"] == "ativo" and momento_despejo(m) <= agora
+
+
+def abrir_vaga(estado: dict, novo: str, agora: datetime) -> str | None:
+    """Chegou vizinho novo: sai o atrasado mais antigo (de preferência da mesma região). Retorna quem saiu."""
+    fila = [(u, m) for u, m in estado["moradores"].items() if u != novo and na_fila(m, agora)]
+    if not fila:
+        return None
+    reg = estado["moradores"][novo].get("regiao")
+    mesma = [x for x in fila if x[1].get("regiao") == reg]
+    u, m = min(mesma or fila, key=lambda x: momento_despejo(x[1]))
+    m["status"] = "despejado"
+    m["despejado_em"] = iso(agora)
+    evento(estado, "despejo", agora, usuario=u, motivo="chegou vizinho novo", entrou=novo)
+    return u
+
+
 def atualizar(estado: dict, agora: datetime) -> list[str]:
-    """Despeja quem ficou sem saldo e recalcula o top 1. Retorna os despejados."""
+    """Despeja quem ficou sem saldo e recalcula o top 1. Retorna os despejados.
+    Com "despejo_so_quando_lota", ninguém sai só pelo tempo: quem passou da tolerância fica "na fila"
+    e só perde o apê quando chega um vizinho novo (ver abrir_vaga)."""
     despejados = []
     for u, m in estado["moradores"].items():
+        if CONFIG.get("despejo_so_quando_lota"):
+            break
         if m["status"] == "ativo" and momento_despejo(m) <= agora:
             m["status"] = "despejado"
             m["despejado_em"] = iso(agora)
@@ -428,6 +453,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
                 "horas": round(horas, 2),
                 "alerta": horas <= alerta,
                 "atrasado": pago <= agora,
+                **({"fila": True} if CONFIG.get("despejo_so_quando_lota") and momento_despejo(m) <= agora else {}),
                 "tot": tot, "br": tot * CONFIG.get("brasas_por_aura", 10),
                 "mv": moveis_de(tot), "prox": list(prox) if prox else None,
                 "desde": m["entrou_em"][:10]}
@@ -452,7 +478,8 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
         cidades[cod] = montar_cidade(nome, [t for t in rk if t[1].get("regiao") == cod])
     n_blocos = max(1, sum(c["total_blocos"] for c in cidades.values()))
 
-    proximo = min((momento_despejo(m) for _, m, _ in rk), default=None)
+    # com despejo só quando lota, o relógio mostra quando o próximo morador entra na fila (quem já está na fila não conta)
+    proximo = min((momento_despejo(m) for _, m, _ in rk if momento_despejo(m) > agora), default=None)
     recentes = agora - timedelta(hours=1)
     pagaram = sorted({e["usuario"] for e in estado["eventos"]
                       if e["tipo"] in ("pagou", "novo_morador", "voltou") and de_iso(e["quando"]) >= recentes})
@@ -496,6 +523,8 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None
         "regioes": regioes,
         "regiao_campea": campea,
         "proximo_despejo": iso(proximo) if proximo else None,
+        "despejo_so_quando_lota": bool(CONFIG.get("despejo_so_quando_lota")),
+        "na_fila": sum(1 for _, m, _ in rk if momento_despejo(m) <= agora),
         "total_moradores": len(rk),
         "total_blocos": n_blocos,
         "cidades": cidades,
@@ -545,7 +574,9 @@ def regras_texto(agora: datetime | None = None) -> list[str]:
         f"Escreva AURA + um número de 1 a {c['personagens']} (ex.: AURA 7) para escolher seu personagem. Pode trocar quando quiser.",
         f"O aluguel gasta 1 dia por dia. Dá pra guardar até {_tempo(c['saldo_maximo_horas'])} de aluguel pago.",
         f"Faltando menos de {_tempo(c['alerta_quando_faltar_horas'])}, sua janela mostra VENCENDO.",
-        f"Acabou o crédito? Você ainda tem {_tempo(c['carencia_horas'])} de tolerância como ATRASADO antes do despejo.",
+        (f"Acabou o crédito? Você fica ATRASADO, mas continua morando. Depois de {_tempo(c['carencia_horas'])} atrasado, entra na fila do despejo: "
+         "só perde o apê quando chegar um vizinho novo e o prédio estiver cheio." if c.get("despejo_so_quando_lota") else
+         f"Acabou o crédito? Você ainda tem {_tempo(c['carencia_horas'])} de tolerância como ATRASADO antes do despejo."),
         f"Despejado vai para a Pracinha e fica lá por até {c.get('pracinha_dias', 30)} dias. Comentou AURA, volta pro prédio na hora.",
         "Ranking do mês: quem faz mais AURAs no mês mora mais alto. O 1º lugar ganha a Cobertura VIP e o outdoor.",
         "Todo dia 1 tem reajuste: o valor do AURA pode mudar e o ranking recomeça. O crédito que você já tem não muda.",
