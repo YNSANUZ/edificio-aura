@@ -135,11 +135,13 @@ class Regras(unittest.TestCase):
         self.assertEqual([p["u"] for p in dados["pracinha"]], ["ze_do_pastel"])
         self.assertEqual(dados["total_moradores"], 0)
 
-    def test_inquilino_novo_tem_10_dias(self):
+    def test_inquilino_novo_tem_dias_gratis(self):
+        gratis = M.CONFIG["saldo_inicial_horas"] / 24
+        tolerancia = M.CONFIG["carencia_horas"] / 24
         M.aplicar_lote(self.e, [c(1, "ana", "AURA", 0)], T0)
-        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=10)), [])
-        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=12)), [])  # tolerância
-        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=13, minutes=1)), ["ana"])
+        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=gratis)), [])
+        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=gratis + tolerancia - 1)), [])  # tolerância
+        self.assertEqual(M.atualizar(self.e, T0 + timedelta(days=gratis + tolerancia, minutes=1)), ["ana"])
 
     def test_usuario_estranho_e_ignorado(self):
         r = M.aplicar_lote(self.e, [c(1, "<script>", "AURA", 0)], T0)

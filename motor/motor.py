@@ -392,6 +392,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
         "total_blocos": n_blocos,
         "cidades": cidades,
         "saldo_maximo_horas": CONFIG.get("barra_cheia_horas", teto),
+        "regras_dias_gratis": round(CONFIG["saldo_inicial_horas"] / 24),
         "vip": vip,
         "ranking": [{"u": u, "p": m["personagem"], "r": m.get("regiao"), "n": n} for u, m, n in rk[:100]],
         "ranking_semana": ranking_semana(estado, agora)[:100],
