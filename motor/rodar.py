@@ -60,7 +60,13 @@ def ciclo_real() -> None:
     except Exception as e:  # banco fora do ar não pode parar o prédio
         log(f"Banco da lojinha: não consegui atualizar agora ({str(e)[:150]})")
     M.salvar(estado)
-    dados = M.exportar(estado, agora, SITE)
+    try:
+        import quartos_db
+        views = quartos_db.visualizacoes()
+    except Exception as e:
+        views = {}
+        log(f"Banco: não consegui ler as visualizações ({str(e)[:120]})")
+    dados = M.exportar(estado, agora, SITE, views)
     M.gravar_regras_md(REGRAS_MD, agora)
     log(f"{len(comentarios)} comentários lidos {resumo} | {dados['total_moradores']} moradores, "
         f"{dados['total_blocos']} blocos, top1 = {dados['vip']['u'] if dados['vip'] else '-'}")

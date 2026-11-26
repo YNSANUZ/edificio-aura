@@ -409,7 +409,8 @@ def bairro_do_bloco(n: int) -> str:
     return "Vila"
 
 
-def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
+def exportar(estado: dict, agora: datetime, pasta_site: Path, views: dict | None = None) -> dict:
+    views = views or {}   # visualizações de cada quarto (vêm do banco; aparecem como 👁 no nome)
     rk = ranking(estado, agora)
     alerta = CONFIG["alerta_quando_faltar_horas"]
     teto = CONFIG["saldo_maximo_horas"]
@@ -419,7 +420,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
         horas = horas_cobradas(agora, pago)
         tot = m.get("total_auras", len(m["auras"]))
         prox = proximo_movel(tot)
-        return {"u": u, "p": m["personagem"], "r": m.get("regiao"), "auras": n,
+        return {"u": u, "p": m["personagem"], "r": m.get("regiao"), "auras": n, **({"v": views[u]} if views.get(u) else {}),
                 "horas": round(horas, 2),
                 "alerta": horas <= alerta,
                 "atrasado": pago <= agora,
@@ -471,7 +472,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
         novo = de_iso(m["entrou_em"]) >= novos_desde
         ativo = bool(m["ultimo_aura"]) and de_iso(m["ultimo_aura"]) >= ativos_desde
         if novo or ativo:
-            praca.append({"u": u, "p": m["personagem"], "r": m.get("regiao"), "novo": novo,
+            praca.append({"u": u, "p": m["personagem"], "r": m.get("regiao"), "novo": novo, **({"v": views[u]} if views.get(u) else {}),
                           "t": max(m["entrou_em"], m["ultimo_aura"] or "")})
     praca.sort(key=lambda x: x["t"], reverse=True)
     praca = [{k: v for k, v in x.items() if k != "t"} for x in praca[:40]]

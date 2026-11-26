@@ -107,3 +107,14 @@ def curtidas_novas(estado: dict) -> list[dict]:
     req = urllib.request.Request(url.rstrip("/") + q, headers={"apikey": chave, "Authorization": "Bearer " + chave})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode())
+
+
+def visualizacoes() -> dict:
+    """{@: visualizações} de todos os quartos (para o 👁 no nome). Sem banco: vazio."""
+    url, chave = _env("SUPABASE_URL"), _env("SUPABASE_SERVICE_KEY")
+    if not (url and chave):
+        return {}
+    req = urllib.request.Request(url.rstrip("/") + "/rest/v1/stats_quarto?select=u,views&views=gt.0&limit=200000",
+                                 headers={"apikey": chave, "Authorization": "Bearer " + chave})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return {x["u"]: x["views"] for x in json.loads(r.read().decode())}
