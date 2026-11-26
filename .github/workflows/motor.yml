@@ -1,0 +1,68 @@
+# Roda o motor do Edifício Aura sozinho, sem depender de nenhum PC.
+# A cada ~10 minutos: lê os comentários do @comenteaura (só leitura), aplica as regras,
+# guarda a memória do prédio no ramo "motor" e publica os dados no site (este ramo, nexo.yt).
+name: Motor do Edifício Aura
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # o GitHub às vezes atrasa alguns minutos
+  workflow_dispatch: {}       # botão "Run workflow" para rodar na hora
+
+concurrency:
+  group: motor-aura
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  ciclo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Baixa o site publicado
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: publicado
+
+      - name: Baixa o motor e a memória do prédio
+        uses: actions/checkout@v4
+        with:
+          ref: motor
+          path: motor-ramo
+
+      - name: Roda um ciclo
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          AURA_SEM_PUBLICAR: "1"
+          TZ: America/Sao_Paulo
+        run: |
+          if [ -z "$IG_TOKEN" ]; then echo "Falta o segredo IG_TOKEN no repositório."; exit 1; fi
+          cd motor-ramo/motor
+          umask 077
+          printf 'IG_TOKEN=%s\nIG_USER_ID=me\nIG_TOKEN_RENOVADO_EM=\n' "$IG_TOKEN" > .env
+          python3 rodar.py --uma-vez
+          rm -f .env
+          tail -n 3 dados/log.txt || true
+
+      - name: Publica os dados no site (só se mudou algo)
+        env:
+          AURA_DEPLOY: ${{ github.workspace }}/publicado
+        run: |
+          cd publicado
+          git config user.name "motor-aura[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd ../motor-ramo/motor
+          python3 publicar.py --dados
+
+      - name: Guarda a memória do prédio
+        run: |
+          cd motor-ramo
+          rm -f motor/.env
+          git config user.name "motor-aura[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "estado sem mudanças"; exit 0; fi
+          git commit -q -m "Estado do prédio $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q origin HEAD:motor
