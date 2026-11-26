@@ -12,6 +12,20 @@
    "total_auras": 1,
    "regiao": "SE",
    "regiao_auto": true
+  },
+  "brunoleaod": {
+   "personagem": 9,
+   "pago_ate": "2026-12-26T18:43:54+00:00",
+   "auras": [
+    "2026-11-26T18:43:54+00:00"
+   ],
+   "status": "ativo",
+   "entrou_em": "2026-11-26T18:43:54+00:00",
+   "ultimo_aura": "2026-11-26T18:43:54+00:00",
+   "ultimo_cid": "17908344501602632",
+   "ultimo_cid_em": "2026-11-26T18:44:00+00:00",
+   "regiao": "CO",
+   "total_auras": 1
   }
  },
  "comentarios_vistos": [
@@ -22,7 +36,9 @@
   "18352036072264724",
   "18133515274916160",
   "18227147818340077",
-  "18139512352734986"
+  "18139512352734986",
+  "17916809016475082",
+  "17908344501602632"
  ],
  "eventos": [
   {
@@ -34,11 +50,29 @@
    "tipo": "novo_top1",
    "quando": "2026-11-26T14:50:47+00:00",
    "usuario": "gatito.anime"
+  },
+  {
+   "tipo": "novo_morador",
+   "quando": "2026-11-26T18:43:54+00:00",
+   "usuario": "brunoleaod"
+  },
+  {
+   "tipo": "novo_top1",
+   "quando": "2026-11-26T18:44:00+00:00",
+   "usuario": "brunoleaod"
+  },
+  {
+   "tipo": "mudou_regiao",
+   "quando": "2026-11-26T18:44:00+00:00",
+   "usuario": "brunoleaod",
+   "regiao": "CO"
   }
  ],
- "top1": "gatito.anime",
+ "top1": "brunoleaod",
  "curtidas_vistas": [],
  "banco": {
-  "gatito.anime": "10|{\"cama\": 1}|2966effa"
- }
+  "gatito.anime": "10|{\"cama\": 1}|2966effa",
+  "brunoleaod": "10|{\"cama\": 1}|562273a9"
+ },
+ "dm_enviadas": {}
 }
