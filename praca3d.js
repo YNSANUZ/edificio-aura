@@ -208,15 +208,10 @@ function montarTelao(cena, D) {
   return { atualizar, chama };
 }
 
-/* quem anda na praça: os moradores que chegaram por último (+ figurantes se tiver pouca gente) */
+/* quem anda na praça: SÓ quem chegou nas últimas 24h ou está ativo agora (lista "praca" que o motor manda).
+   Quando o banco tiver tempo real, entra também quem está online de verdade. */
 function escolherGente(D) {
-  const todos = [];
-  for (const c of Object.values((D && D.cidades) || {})) {
-    if (c.vip) todos.push(c.vip);
-    for (const b of c.blocos || []) for (const m of b.aptos || []) if (m) todos.push(m);
-  }
-  todos.sort((a, b) => String(b.desde || "").localeCompare(String(a.desde || "")));
-  return todos.slice(0, MAX_MORADORES);
+  return ((D && D.praca) || []).slice(0, MAX_MORADORES);
 }
 
 export function abrir(host, ctx) {
@@ -245,7 +240,7 @@ export function abrir(host, ctx) {
     const gente = escolherGente(D), nomes = new Set(gente.map((m) => m.u));
     pessoas = pessoas.filter((p) => { const fica = p.figurante ? false : nomes.has(p.u) || p.eu; if (!fica) cena.remove(p.g); return fica; });
     for (const m of gente) if (!pessoas.some((p) => p.u === m.u && !p.eu)) pessoas.push(criarPessoa(cena, { u: m.u, p: m.p || 1 }));
-    const faltam = Math.max(0, 5 - pessoas.filter((p) => !p.eu).length);
+    const faltam = Math.max(0, 3 - pessoas.filter((p) => !p.eu).length);   // praça vazia: 3 passantes sem @
     for (let i = 0; i < faltam; i++) pessoas.push(criarPessoa(cena, { p: 1 + Math.floor(Math.random() * 20), figurante: true }));
     telao.atualizar(D);
   };
