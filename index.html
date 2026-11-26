@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Edifício Aura</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#ff7a1a">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
@@ -365,6 +369,24 @@
   .novCard button{border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 13px 'Baloo 2',sans-serif; padding:1px 8px; cursor:pointer; color:var(--carvao)}
   .novCard button.x{background:#fff}
   .btNovidades{border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 13px 'Baloo 2',sans-serif; padding:1px 10px; cursor:pointer; margin:0 0 6px; color:var(--carvao)}
+  /* ===== Fases 4–6: painel do bloco, disputa, zeladores, missão ===== */
+  .painel{margin:6px 10px; background:var(--creme); border:3px solid var(--carvao); border-radius:16px; padding:6px 10px; font-weight:700; font-size:13.5px}
+  .painel h3{margin:0 0 4px; font-size:16px} .painel p{margin:3px 0}
+  body:not(.v-predio) .infoBloco{display:none} body:not(.v-cidade) .painelCidade{display:none}
+  .infoBloco .lema{font-style:italic; color:#8a5a3a}
+  .infoBloco .melh{display:flex; gap:6px; flex-wrap:wrap; margin:4px 0}
+  .infoBloco .melh span{border:2px solid var(--carvao); border-radius:10px; padding:0 6px; background:#fff3c4; font-size:12.5px}
+  .infoBloco .melh span.falta{background:#eee; color:#999; border-style:dashed}
+  .barra2{height:10px; border-radius:6px; background:#0002; overflow:hidden; margin:2px 0}
+  .barra2 b{display:block; height:100%; background:linear-gradient(90deg,var(--amarelo),var(--laranja))}
+  .infoBloco button{border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 12.5px 'Baloo 2',sans-serif; padding:0 8px; cursor:pointer; color:var(--carvao)}
+  .predio.nivel3 .telhado img{filter:drop-shadow(0 0 6px #ffd23f)} .predio.nivel4{filter:drop-shadow(0 0 10px #ffd23f)}
+  .painelCidade .lin{display:flex; align-items:center; gap:6px; margin:3px 0} .painelCidade .lin span{flex:0 0 105px}
+  .painelCidade .lin i{flex:1; height:12px; border-radius:6px; background:#0002; overflow:hidden} .painelCidade .lin i b{display:block; height:100%; background:var(--laranja)}
+  .zeladores .z{display:flex; gap:8px; align-items:center; margin:4px 0; cursor:pointer} .zeladores img{height:44px}
+  .missao{margin:4px 10px 0; background:#2e7d32; color:#fff; border:2px solid var(--carvao); border-radius:12px; padding:2px 10px; font-weight:800; font-size:13px; text-align:center}
+  .ficha .postais{margin:8px 0 2px; background:#fff; border:2px solid var(--carvao); border-radius:14px; padding:6px 8px; font-weight:700; font-size:13px}
+  .ficha .postais span{display:inline-block; background:#e8f4ff; border-radius:10px; padding:0 7px; margin:2px; cursor:pointer}
   .galeria{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
   .galeria button{border:2px solid var(--carvao); border-radius:12px; background:#fff; padding:2px 2px 0; cursor:pointer; font:800 13px 'Baloo 2',sans-serif; color:var(--carvao)}
   .galeria button.bonecoAtual{background:var(--amarelo)}
@@ -506,6 +528,7 @@
     </form>
     <div class="aviso" id="aviso" hidden></div>
     <button class="valor" id="valor" type="button">🔥 Este mês cada AURA paga <b id="valorAura">12h</b> · ver regras</button>
+    <div class="missao" id="missao" hidden></div>
   </header>
 
   <section class="brasil mapa25" id="brasil">
@@ -529,6 +552,7 @@
     <div class="tit-cidade" id="titCidade">CIDADE AURA<small>toque num prédio para entrar</small></div>
     <div class="zoomctl"><button data-z="1" aria-label="aproximar">+</button><button data-z="-1" aria-label="afastar">−</button></div>
   </section>
+  <div class="painel painelCidade" id="painelCidade"></div>
   <div id="nuvemVoo" aria-hidden="true"></div>
 
   <section class="ape" id="ape">
@@ -549,6 +573,7 @@
     </div>
     <div class="podio" id="rkPodio"></div>
     <div class="rkEu" id="rkEu"></div>
+    <div class="painel zeladores" id="zeladores"></div>
     <ol class="rkLista" id="rkLista"></ol>
   </section>
   <div class="modal" id="cartao" hidden>
@@ -601,6 +626,7 @@
     <div class="outdoor"><div class="tela"><small>OUTDOOR DO TOP 1</small><b id="outdoorNome">seu @ aqui</b><i>anuncie sua marca</i></div><img src="img/outdoor.png" alt=""></div>
   </div>
 
+  <div class="painel infoBloco" id="infoBloco"></div>
   <div class="predio" id="predio">
     <div class="telhado">
       <img src="img/telhado.png" alt="">
@@ -713,6 +739,7 @@ function montar(){
   document.getElementById('vipTag').textContent=vip?`👑 @${vip.u}${viewsDe(vip.u)?' 👁 '+fmtNum(viewsDe(vip.u)):''} · TOP 1 do ${C().nome}`:'';
   if(vip) document.getElementById('vipCorpo').src=`img/corpo${vip.p}.png`;
   document.getElementById('outdoorNome').textContent=D.vip?'@'+D.vip.u:'seu @ aqui';
+  painelBloco(bloco); missaoHoje();
   document.getElementById('valorAura').textContent=(D.valor_aura||12)+'h';
   const pr=D.pracinha||[], banco=document.getElementById('banco');
   document.getElementById('praca').hidden=!pr.length;
@@ -768,7 +795,7 @@ function mostrarNoPredio(nome){
 }
 const EMOJI_REGRA=[[/^Comente AURA em/,'💬'],[/grátis/,'🎁'],[/aluguel é pago/,'💸'],[/a cada \d+ horas/,'⏱️'],[/personagem/,'🧍'],
   [/gasta 1 dia/,'📅'],[/VENCENDO/,'⏳'],[/ATRASADO/,'⚠️'],[/Pracinha/,'🚚'],[/Ranking/,'🏆'],[/reajuste/,'📈'],[/apartamentos/,'🏢'],
-  [/móveis/,'🛋️'],[/região/,'🗺️'],[/bairros/,'🏘️']];
+  [/móveis/,'🛋️'],[/nível/,'🏢'],[/síndico/,'👷'],[/missão/,'🎯'],[/região/,'🗺️'],[/bairros/,'🏘️']];
 function emojiRegra(r){ const e=EMOJI_REGRA.find(([re])=>re.test(r)); return e?e[1]:'🔥'; }
 function abrirRegras(e){ e&&e.preventDefault();
   document.getElementById('listaRegras').innerHTML=(D.regras||[]).map(r=>`<li><span>${emojiRegra(r)}</span><div>${esc(r)}</div></li>`).join('');
@@ -805,6 +832,7 @@ let vista=params.get('ver')||'brasil';
 function vagasDoBairro(b){ const v=[]; for(let k=0;k<POR_LOTE[b];k++) for(const L of LOTES[b]){ if(b==='Vila'){ const P=[[-6.5,0],[6.5,0.8],[-6.5,4.6],[6.5,5.4]][k]; v.push([L[0]+P[0],L[1]+P[1]]); continue; }
     const o=k===1?(L[0]<50?1:-1)*ABRE[b]:k===2?(L[0]<50?-1:1)*ABRE[b]:0; v.push([L[0]+o,L[1]+VAGAS_LOTE[k][1]]); } return v; }
 function montarCidade(){
+  painelCidade();
   const pagaram=new Set(D.pagaram_ultima_hora||[]);
   const porBairro={}; C().blocos.forEach((bl,i)=>{ const b=bl.bairro||'Vila'; (porBairro[b]=porBairro[b]||[]).push(i); });
   let h='', meuBloco=-1;
@@ -852,7 +880,7 @@ document.getElementById('mapaCoisas').addEventListener('click',e=>{
   if(e.target.closest('#fonteMapa')) voarPara('predio',()=>setTimeout(()=>document.getElementById('praca').scrollIntoView({behavior:'smooth'}),400),e.target.closest('#fonteMapa'));
 });
 function ver(v){
-  vista=v; document.body.classList.toggle('v-cidade',v==='cidade'); document.body.classList.toggle('v-brasil',v==='brasil'); document.body.classList.toggle('v-ape',v==='ape'); document.body.classList.toggle('v-ranking',v==='ranking'); document.body.classList.toggle('v-aura3d',v==='aura3d');
+  vista=v; document.body.classList.toggle('v-cidade',v==='cidade'); document.body.classList.toggle('v-brasil',v==='brasil'); document.body.classList.toggle('v-ape',v==='ape'); document.body.classList.toggle('v-ranking',v==='ranking'); document.body.classList.toggle('v-aura3d',v==='aura3d'); document.body.classList.toggle('v-predio',v==='predio');
   document.getElementById('irAura3d').classList.toggle('on',v==='aura3d');
   if(v==='aura3d') abrirPraca3d(); else if(praca3d) praca3d.desligar();
   document.getElementById('irRanking').classList.toggle('on',v==='ranking');
@@ -1041,7 +1069,8 @@ function abrirApe(nome,silencioso){
     +`<div class="dicas"><b class="t">💡 Como mudar</b>`
       +`<p><span>🧍</span><span>Trocar de boneco: comente <b>AURA + número</b> de 1 a 20 (ex.: AURA 7)<button id="verBonecos">ver os 20</button></span></p>`
       +`<p><span>🗺️</span><span>Mudar de região: comente <b>AURA + região ou estado</b> (ex.: AURA NE, AURA SP, AURA DF)</span></p></div>`
-    +`<div class="visitas" id="visitasApe"></div>`
+    +(m.missao?`<div class="dicas" style="background:#e8f8e8">🎯 Missão de hoje cumprida! +${(D.missao_hoje||{}).bonus||20} 🔥 Brasas</div>`:'')
+    +`<div class="visitas" id="visitasApe"></div><div class="postais" id="postaisApe" hidden></div>`
     +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`
     +(Casa.ligada?`<div class="botoes dois"><button class="loja" id="apeLoja">${Casa.sessao&&Casa.sessao.u===m.u?'🛍️ Lojinha · decorar meu quarto':Casa.sessao?'🏠 Voltar pro meu quarto':'🔑 É meu quarto? Entrar'}</button></div>`:'');
   if(Casa.ligada) document.getElementById('apeLoja').onclick=()=>Casa.sessao&&Casa.sessao.u===m.u?abrirLoja():Casa.sessao?buscar(Casa.sessao.u):abrirEntrar(m.u);
@@ -1049,7 +1078,7 @@ function abrirApe(nome,silencioso){
   document.getElementById('apeVerPredio').onclick=()=>voarPara('predio',()=>{ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; montar(); setTimeout(()=>mostrarNoPredio(m.u),50); });
   document.getElementById('apeCompartilhar').onclick=()=>abrirCartao(a,pos);
   document.getElementById('verBonecos').onclick=()=>abrirGaleria(m.p);
-  pedirMural(m.u);
+  pedirMural(m.u); pedirPostais(m.u);
   if(!silencioso||!statsCache[m.u]) contarVisualizacao(m.u);
   if(!silencioso) boasVindas(m);
 }
@@ -1199,8 +1228,73 @@ document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja'
 function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); if(praca3d) base3d(); }
 document.getElementById('lojaSair').onclick=sairLoja;
 
+/* ===== Fases 4–6: painel do bloco, disputa entre bairros, zeladores, missão do dia, postais ===== */
+const LEMAS=['Aqui a aura não apaga 🔥','Bloco unido jamais é despejado','Vizinho bom comenta todo dia','Do térreo à cobertura',
+  'Aqui ninguém fica atrasado','Aura alta, aluguel em dia','O bloco mais animado do Brasil','Chegou, comentou, morou'];
+const NOME_MELH={portaria:'Portaria',elevador:'Elevador',piscina:'Piscina',academia:'Academia',heliponto:'Heliponto'};
+let lemasCache=null;
+async function pedirLemas(){
+  if(!BANCO.url||lemasCache) return;
+  lemasCache={};
+  try{ const r=await fetch(BANCO.url.replace(/\/$/,'')+'/rest/v1/lemas?select=chave,lema',{headers:{apikey:BANCO.chave,Authorization:'Bearer '+BANCO.chave}});
+    (await r.json()).forEach(x=>lemasCache[x.chave]=x.lema); if(vista==='predio') montar(); }catch(e){}
+}
+function painelBloco(bloco){
+  const el=document.getElementById('infoBloco'); const info=bloco&&bloco.info;
+  document.getElementById('predio').classList.remove('nivel1','nivel2','nivel3','nivel4');
+  if(!info){ el.innerHTML=''; el.hidden=true; return; }
+  el.hidden=false; pedirLemas();
+  document.getElementById('predio').classList.add('nivel'+info.nivel.n);
+  const chave=`${cidadeAtual}-${bloco.numero}`, lema=lemasCache&&lemasCache[chave];
+  const mu=info.mutirao, s=Casa.sessao;
+  let h=`<h3>🏢 Bloco ${bloco.numero} · ${esc(info.nivel.nome)}</h3>`;
+  if(info.nivel.prox) h+=`<p>⬆️ Faltam ${Math.max(0,info.nivel.prox-bloco.aptos.filter(Boolean).length)} moradores pro próximo nível</p>`;
+  if(info.sindico) h+=`<p>👷 Síndico <b>@${esc(info.sindico)}</b>${info.sub?` · Sub @${esc(info.sub)}`:''}</p>`;
+  if(lema!=null) h+=`<p class="lema">“${esc(LEMAS[lema]||'')}”</p>`;
+  if(s&&info.sindico===s.u&&Casa.ligada) h+=`<p><button id="escolherLema">✏️ Escolher o lema do bloco</button></p>`;
+  h+=`<div class="melh">${info.melhorias.map(x=>`<span class="${x.falta?'falta':''}" title="${x.falta?'faltam '+x.falta+' AURAs':'liberado'}">${x.e} ${NOME_MELH[x.id]||x.id}${x.falta?` · ${x.falta}`:' ✓'}</span>`).join('')}</div>`;
+  h+=`<p>🧱 Mutirão da semana: <b>${esc(mu.obra)}</b> ${mu.ok?'✅ conseguimos!':`· ${mu.feito}/${mu.meta} AURAs`}</p><div class="barra2"><b style="width:${Math.min(100,mu.feito/mu.meta*100)}%"></b></div>`;
+  el.innerHTML=h;
+  const bt=document.getElementById('escolherLema'); if(bt) bt.onclick=()=>escolherLema(chave);
+}
+function escolherLema(chave){
+  document.getElementById('bvTexto').innerHTML=`<h2>✏️ Lema do bloco</h2><p>Escolha um lema pronto:</p><ul class="bvLinhas">${LEMAS.map((l,i)=>`<li data-lema="${i}" style="cursor:pointer"><span>💬</span><div>${esc(l)}</div></li>`).join('')}</ul><p id="lemaMsg"></p>`;
+  document.getElementById('boasVindas').hidden=false;
+  document.querySelector('#bvTexto .bvLinhas').onclick=async e=>{ const li=e.target.closest('[data-lema]'); if(!li) return;
+    const msg=document.getElementById('lemaMsg'); msg.textContent='Salvando…';
+    try{ await Casa.rpc('escolher_lema',{p_u:Casa.sessao.u,p_senha:Casa.sessao.senha,p_lema:+li.dataset.lema}); lemasCache=lemasCache||{}; lemasCache[chave]=+li.dataset.lema;
+      document.getElementById('boasVindas').hidden=true; montar(); }
+    catch(er){ msg.textContent=er.message==='NAO_SINDICO'?'Só o síndico do bloco pode escolher.':(ERROS[er.message]||ERROS.REDE); } };
+}
+function painelCidade(){
+  const el=document.getElementById('painelCidade'), d=D.disputa_bairros; if(!d){ el.innerHTML=''; return; }
+  const max=Math.max(1,...Object.values(d.placar));
+  el.innerHTML=`<h3>⚔️ Disputa entre bairros da semana</h3>`+Object.entries(d.placar).map(([b,n])=>`<div class="lin"><span>${b===d.lider?'🏆 ':''}${esc(b)}</span><i><b style="width:${n/max*100}%"></b></i><em>${n}</em></div>`).join('')
+    +`<p style="font-size:12px;color:#8a5a3a">AURAs dos últimos 7 dias, somando todas as regiões.</p>`;
+}
+function painelZeladores(){
+  const el=document.getElementById('zeladores'), z=D.zeladores||[];
+  el.innerHTML=(D.sindico_geral?`<h3>👑 Síndico Geral: @${esc(D.sindico_geral)}</h3>`:'')+(z.length?`<h3>🧹 Zeladores da semana</h3>`
+    +z.map(x=>`<div class="z" data-u="${esc(x.u)}"><img src="img/feliz${x.p}.png" alt=""><div>${x.e} <b>${esc(x.titulo)}</b><br>@${esc(x.u)} · ${esc(x.txt)}</div></div>`).join(''):'');
+}
+document.getElementById('zeladores').addEventListener('click',e=>{ const x=e.target.closest('[data-u]'); if(x) buscar(x.dataset.u); });
+function missaoHoje(){
+  const el=document.getElementById('missao'), m=D.missao_hoje; if(!m){ el.hidden=true; return; }
+  el.hidden=false; el.textContent=`🎯 Missão de hoje: ${m.texto} (+${m.bonus} 🔥)`;
+}
+async function pedirPostais(u){
+  const el=document.getElementById('postaisApe'); if(!el||!BANCO.url) return;
+  try{ const r=await fetch(BANCO.url.replace(/\/$/,'')+'/rest/v1/curtidas?select=dono,reacao&order=quando.desc&limit=30&visitante=eq.'+encodeURIComponent(u),{headers:{apikey:BANCO.chave,Authorization:'Bearer '+BANCO.chave}});
+    const l=await r.json(); if(apeNome!==u||!Array.isArray(l)||!l.length){ el.hidden=true; return; }
+    const donos=[...new Map(l.map(x=>[x.dono,x])).values()];
+    el.hidden=false; el.innerHTML=`📮 <b>Postais de @${esc(u)}</b> · quartos que visitou e curtiu:<br>`+donos.map(x=>`<span data-u="${esc(x.dono)}">${x.reacao} @${esc(x.dono)}</span>`).join('');
+    el.onclick=e=>{ const x=e.target.closest('[data-u]'); if(x) buscar(x.dataset.u); }; }catch(e){ el.hidden=true; }
+}
+
 /* ===== Novidades ===== */
 const NOVIDADES=[   /* a 1ª é a mais nova; troque o "id" quando tiver novidade nova */
+  {id:'2611d', data:'26/11', itens:[['🎯','Missão do dia: cumpra comentando AURA e ganhe +20 Brasas'],['🏢','Blocos sobem de nível e liberam portaria, elevador, piscina…'],
+    ['🧱','Mutirão da semana: o bloco todo junta AURAs pra sair a obra'],['👷','Síndico, subsíndico, Síndico Geral e zeladores da semana'],['⚔️','Disputa entre bairros: Nobre × Centro × Vila']]},
   {id:'2611c', data:'26/11', itens:[['🌳','Praça no meio do mapa: veja quem chegou agora andando por lá'],['👁','Contador de visualizações em cada quarto'],
     ['🧍','Galeria dos 20 bonecos: escolha o seu e comente AURA + número'],['🗺️','Escolha sua região pelo estado: AURA SP, AURA BA, AURA DF']]},
   {id:'2611b', data:'26/11', itens:[['🎁','30 dias de aluguel grátis pra quem chega'],['💸','Cada AURA agora paga 36h de aluguel']]},
@@ -1376,6 +1470,7 @@ function listaRanking(){
   return [c.vip,...c.blocos.flatMap(b=>b.aptos)].filter(Boolean).map(m=>({u:m.u,p:m.p,r:m.r,n:m.auras}));
 }
 function montarRanking(){
+  painelZeladores();
   document.getElementById('rkReg').innerHTML=RK_REG.map(([k,n])=>`<button data-r="${k}" class="${k===rkRegiao?'on':''}">${n}</button>`).join('');
   document.querySelectorAll('#rkPeriodo button').forEach(b=>b.classList.toggle('on',b.dataset.p===rkPeriodo));
   document.getElementById('rkObs').textContent=rkPeriodo==='mes'?'AURAs feitos neste mês · recomeça todo dia 1':'AURAs feitos nos últimos 7 dias';
