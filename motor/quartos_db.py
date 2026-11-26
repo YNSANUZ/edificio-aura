@@ -20,7 +20,6 @@ import urllib.request
 
 import motor as M
 
-ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"   # sem 0/O, 1/I/L para não confundir
 
 
 def _env(nome: str) -> str:
@@ -35,20 +34,24 @@ def _env(nome: str) -> str:
 
 
 def senha_de(usuario: str, segredo: str | None = None) -> str:
-    """Senha fixa do quarto: 8 letras/números, em dois grupos (ex.: K7PX-3MWA)."""
+    """Senha fixa do quarto: 6 números (ex.: 482139). Fácil de digitar no celular."""
     segredo = segredo or _env("AURA_SEGREDO")
     if not segredo:
         raise RuntimeError("Falta AURA_SEGREDO")
     h = hmac.new(segredo.encode(), ("quarto:" + usuario.lower()).encode(), hashlib.sha256).digest()
-    c = "".join(ALFABETO[b % len(ALFABETO)] for b in h[:8])
-    return c[:4] + "-" + c[4:]
+    return f"{int.from_bytes(h[:8], 'big') % 1_000_000:06d}"
+
+
+def limpar(senha: str) -> str:
+    """Só os números (a pessoa pode digitar com espaço ou traço)."""
+    return "".join(ch for ch in senha if ch.isdigit())
 
 
 def embaralhar(usuario: str, senha: str, segredo: str | None = None) -> tuple[str, str]:
-    """(sal, hash) do jeito que o banco confere: sha256(sal + senha sem espaços, maiúscula)."""
+    """(sal, hash) do jeito que o banco confere: sha256(sal + só os números da senha)."""
     segredo = segredo or _env("AURA_SEGREDO")
     sal = hmac.new(segredo.encode(), ("sal:" + usuario.lower()).encode(), hashlib.sha256).hexdigest()[:16]
-    return sal, hashlib.sha256((sal + senha.replace(" ", "").upper()).encode()).hexdigest()
+    return sal, hashlib.sha256((sal + limpar(senha)).encode()).hexdigest()
 
 
 def linhas(estado: dict, segredo: str | None = None) -> list[dict]:

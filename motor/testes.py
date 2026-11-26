@@ -193,10 +193,10 @@ class Regras(unittest.TestCase):
         import hashlib, quartos_db as Q
         s1, s2 = Q.senha_de("Ana", "segredo-teste"), Q.senha_de("ana", "segredo-teste")
         self.assertEqual(s1, s2)                                  # @ com maiúscula dá a mesma senha
-        self.assertRegex(s1, r"^[A-Z2-9]{4}-[A-Z2-9]{4}$")
+        self.assertRegex(s1, r"^\d{6}$")
         self.assertNotEqual(s1, Q.senha_de("bia", "segredo-teste"))
         self.assertNotEqual(s1, Q.senha_de("ana", "outro-segredo"))
-        sal, h = Q.embaralhar("ana", " " + s1.lower() + " ", "segredo-teste")   # banco aceita minúscula/espaço
+        sal, h = Q.embaralhar("ana", " " + s1[:3] + " " + s1[3:] + " ", "segredo-teste")   # aceita espaço no meio
         self.assertEqual(h, hashlib.sha256((sal + s1).encode()).hexdigest())
         M.aplicar_lote(self.e, [c(i, "ana", "AURA", i * 200) for i in range(4)], T0 + timedelta(hours=14))
         (ln,) = Q.linhas(self.e, "segredo-teste")
