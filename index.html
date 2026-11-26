@@ -387,6 +387,8 @@
   .missao{margin:4px 10px 0; background:#2e7d32; color:#fff; border:2px solid var(--carvao); border-radius:12px; padding:2px 10px; font-weight:800; font-size:13px; text-align:center}
   .ficha .postais{margin:8px 0 2px; background:#fff; border:2px solid var(--carvao); border-radius:14px; padding:6px 8px; font-weight:700; font-size:13px}
   .ficha .postais span{display:inline-block; background:#e8f4ff; border-radius:10px; padding:0 7px; margin:2px; cursor:pointer}
+  .btSom{position:fixed; right:10px; bottom:96px; z-index:65; width:44px; height:44px; border-radius:50%; border:3px solid var(--carvao);
+        background:var(--creme); font-size:20px; cursor:pointer; box-shadow:0 3px 0 var(--carvao); padding:0; line-height:1}
   .galeria{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
   .galeria button{border:2px solid var(--carvao); border-radius:12px; background:#fff; padding:2px 2px 0; cursor:pointer; font:800 13px 'Baloo 2',sans-serif; color:var(--carvao)}
   .galeria button.bonecoAtual{background:var(--amarelo)}
@@ -653,6 +655,7 @@
   </div>
 </div>
 
+<button class="btSom" id="btSom" aria-label="ligar ou desligar o som">🔊</button>
 <nav class="menu">
   <a href="#" id="irBrasil"><img src="img/chama_simples.png" alt="">Brasil</a>
   <a href="#" id="irCidade"><img src="img/ic_pino.png" alt="">Cidade</a>
@@ -1290,6 +1293,41 @@ async function pedirPostais(u){
     el.hidden=false; el.innerHTML=`📮 <b>Postais de @${esc(u)}</b> · quartos que visitou e curtiu:<br>`+donos.map(x=>`<span data-u="${esc(x.dono)}">${x.reacao} @${esc(x.dono)}</span>`).join('');
     el.onclick=e=>{ const x=e.target.closest('[data-u]'); if(x) buscar(x.dataset.u); }; }catch(e){ el.hidden=true; }
 }
+
+/* ===== Som: música ambiente (trilha original, loop) + "piu" nos toques. Começa no 1º toque; 🔊/🔇 lembra a escolha ===== */
+const Som={ctx:null, musica:null, piu:null, ganho:null, fonte:null, ligado:true, ultimoPiu:0,
+  init(){ try{ this.ligado=localStorage.getItem('aura_som')!=='off'; }catch(e){} this.botao(); },
+  botao(){ const b=document.getElementById('btSom'); b.textContent=this.ligado?'🔊':'🔇'; b.setAttribute('aria-pressed',this.ligado); },
+  async preparar(){
+    if(this.ctx) return; const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    this.ctx=new AC(); this.ganho=this.ctx.createGain(); this.ganho.gain.value=0; this.ganho.connect(this.ctx.destination);
+    const carrega=async u=>{ const r=await fetch(u); return await this.ctx.decodeAudioData(await r.arrayBuffer()); };
+    try{ [this.musica,this.piu]=await Promise.all([carrega('som/musica.mp3'),carrega('som/piu.mp3')]); }catch(e){ return; }
+    if(this.ligado) this.tocar();
+  },
+  tocar(){
+    if(!this.musica||this.fonte) return;
+    const f=this.ctx.createBufferSource(); f.buffer=this.musica; f.loop=true;
+    f.loopStart=0; f.loopEnd=this.musica.duration;   // a trilha foi feita para emendar perfeito no fim
+    f.connect(this.ganho); f.start(0); this.fonte=f;
+    this.ganho.gain.cancelScheduledValues(this.ctx.currentTime); this.ganho.gain.setTargetAtTime(0.16,this.ctx.currentTime,1.2);
+  },
+  parar(){ if(!this.fonte) return; const f=this.fonte; this.fonte=null; this.ganho.gain.setTargetAtTime(0,this.ctx.currentTime,.25); setTimeout(()=>{ try{ f.stop(); }catch(e){} },900); },
+  clique(){
+    if(!this.ligado||!this.piu||!this.ctx) return; const agora=performance.now(); if(agora-this.ultimoPiu<90) return; this.ultimoPiu=agora;
+    const f=this.ctx.createBufferSource(), g=this.ctx.createGain(); f.buffer=this.piu; f.playbackRate.value=.93+Math.random()*.14;
+    g.gain.value=.35; f.connect(g); g.connect(this.ctx.destination); f.start();
+  },
+  alternar(){ this.ligado=!this.ligado; try{ localStorage.setItem('aura_som',this.ligado?'on':'off'); }catch(e){} this.botao();
+    if(this.ligado){ this.preparar().then(()=>{ this.ctx&&this.ctx.resume(); this.tocar(); this.clique(); }); } else this.parar(); }
+};
+Som.init();
+document.getElementById('btSom').addEventListener('click',e=>{ e.stopPropagation(); Som.alternar(); });
+document.addEventListener('pointerdown',e=>{
+  if(!Som.ctx&&Som.ligado) Som.preparar(); else if(Som.ctx&&Som.ctx.state==='suspended') Som.ctx.resume();
+  if(e.target.closest('button,a,.apto,[data-reg],[data-b],[data-u],[data-r],[data-boneco],.vip,#pracaMini,.reg,.lojaItem,.z')&&!e.target.closest('#btSom')) Som.clique();
+},true);
+document.addEventListener('visibilitychange',()=>{ if(!Som.ctx) return; if(document.hidden) Som.ctx.suspend(); else if(Som.ligado) Som.ctx.resume(); });
 
 /* ===== Novidades ===== */
 const NOVIDADES=[   /* a 1ª é a mais nova; troque o "id" quando tiver novidade nova */
