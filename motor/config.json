@@ -113,9 +113,11 @@
   "visitas_brasas_max_dia": 10,
   "banco_ligado": false,
   "dm": {
-    "ligado": false,
+    "ligado": true,
     "so_teste": true,
-    "contas_teste": [],
+    "contas_teste": [
+      "gatito.anime"
+    ],
     "max_por_ciclo": 20
   }
 }
