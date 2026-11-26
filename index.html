@@ -315,6 +315,41 @@
   .bvOk{margin-top:8px; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); font:800 18px 'Baloo 2',sans-serif;
         padding:4px 26px; cursor:pointer; box-shadow:0 3px 0 var(--carvao)}
 
+  /* ===== Entrar + Lojinha ===== */
+  .ficha .botoes.dois{margin-top:6px}
+  .ficha .botoes button.loja{background:var(--laranja); color:#fff}
+  .caixa.entrarCx h2,.caixa.lojaCx h2{margin:0 0 6px; font-size:22px}
+  .entrarCx label{display:block; font-weight:800; font-size:14px; margin:8px 0 2px}
+  .entrarCx input{width:100%; box-sizing:border-box; height:44px; border:3px solid var(--carvao); border-radius:12px; padding:0 12px;
+        font:800 18px 'Baloo 2',sans-serif; background:#fff; color:var(--carvao)}
+  .entrarCx input#entSenha{letter-spacing:3px; text-transform:uppercase}
+  .entrarCx .dica{font-size:13px; font-weight:700; color:#8a5a3a; margin:8px 0 0}
+  .entrarCx .erro{color:#c0281c; font-weight:800; font-size:14px; min-height:20px; margin:6px 0 0}
+  .btGrande{width:100%; margin-top:10px; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); color:var(--carvao);
+        font:800 18px 'Baloo 2',sans-serif; padding:6px; cursor:pointer; box-shadow:0 3px 0 var(--carvao)}
+  .lojaSaldo{display:flex; justify-content:space-between; align-items:center; background:var(--carvao); color:var(--amarelo);
+        border-radius:12px; padding:4px 12px; font-weight:800; margin-bottom:8px}
+  .lojaSaldo b{font-size:22px}
+  .lojaSair{border:0; background:transparent; color:#fff; font:700 13px 'Baloo 2',sans-serif; text-decoration:underline; cursor:pointer}
+  .lojaPecas{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px}
+  .lojaPecas button{flex:0 0 auto; border:2px solid var(--carvao); border-radius:12px; background:#fff; font:800 13px 'Baloo 2',sans-serif;
+        padding:2px 10px; cursor:pointer; color:var(--carvao)}
+  .lojaPecas button.ativo{background:var(--amarelo)}
+  .lojaGrade{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; margin-top:6px}
+  .lojaItem{background:#fff; border:2px solid var(--carvao); border-radius:14px; padding:6px; text-align:center}
+  .lojaItem.usando{background:#fff3c4; border-color:var(--laranja)}
+  .lojaItem img{width:100%; height:80px; object-fit:contain}
+  .lojaItem small{display:block; font-weight:800; font-size:12px; color:#8a5a3a}
+  .lojaItem button{width:100%; margin-top:4px; border:2px solid var(--carvao); border-radius:10px; font:800 13px 'Baloo 2',sans-serif;
+        padding:2px; cursor:pointer; background:var(--amarelo); color:var(--carvao)}
+  .lojaItem button.tenho{background:#fff}
+  .lojaItem button.falta{background:#eee; color:#8a5a3a; cursor:default}
+  .lojaGuardar{margin-top:8px; width:100%; border:2px dashed var(--carvao); border-radius:12px; background:transparent;
+        font:800 14px 'Baloo 2',sans-serif; padding:4px; cursor:pointer; color:var(--carvao)}
+  .lojaMsg{min-height:20px; font-weight:800; font-size:14px; text-align:center; margin-top:6px}
+  .lojaMsg.erro{color:#c0281c}
+  .simulacao{font-size:12px; font-weight:800; color:#fff; background:#c0281c; border-radius:8px; padding:1px 8px; display:inline-block; margin-bottom:6px}
+
   /* ===== Ranking ===== */
   body.v-ranking .ceu, body.v-ranking .predio, body.v-ranking .rua, body.v-ranking .praca, body.v-ranking .cidade, body.v-ranking .brasil,
   body.v-ranking #ant, body.v-ranking #prox{display:none}
@@ -444,6 +479,32 @@
     <div class="caixa bv"><div id="bvTexto"></div><button class="bvOk" id="bvOk">Bora! 🔥</button></div>
   </div>
 
+  <div class="modal" id="entrar" hidden>
+    <div class="caixa entrarCx">
+      <button class="fechar" id="entrarFechar" aria-label="fechar">✕</button>
+      <h2>🔑 Entrar no meu quarto</h2>
+      <div id="entSim"></div>
+      <label for="entU">Seu @ do Instagram</label>
+      <input id="entU" autocomplete="username" placeholder="@seu.nome" autocapitalize="none" spellcheck="false">
+      <label for="entSenha">Senha do quarto</label>
+      <input id="entSenha" autocomplete="current-password" placeholder="XXXX-XXXX" autocapitalize="characters" spellcheck="false">
+      <p class="dica">📩 A senha chega na sua DM do Instagram quando você comenta AURA em um post do @comenteaura.</p>
+      <p class="erro" id="entErro" role="alert"></p>
+      <button class="btGrande" id="entOk">Entrar 🔥</button>
+    </div>
+  </div>
+  <div class="modal" id="loja" hidden>
+    <div class="caixa lojaCx">
+      <button class="fechar" id="lojaFechar" aria-label="fechar">✕</button>
+      <h2>🛍️ Lojinha do apê</h2>
+      <div class="lojaSaldo"><span>🔥 <b id="lojaBrasas">0</b> Brasas</span><button class="lojaSair" id="lojaSair">sair</button></div>
+      <div class="lojaPecas" id="lojaPecas"></div>
+      <div class="lojaGrade" id="lojaGrade"></div>
+      <button class="lojaGuardar" id="lojaGuardar">📦 Guardar esta peça (tirar do quarto)</button>
+      <div class="lojaMsg" id="lojaMsg" role="status"></div>
+    </div>
+  </div>
+
   <div class="ceu">
     <div class="nuvem" style="left:300px;top:20px;width:90px;height:26px"></div>
     <div class="nuvem" style="left:230px;top:70px;width:60px;height:18px"></div>
@@ -484,6 +545,7 @@
   <a href="#" id="irApe"><img src="img/ic_casa.png" alt="">Meu Apê</a>
 </nav>
 
+<script src="config.js"></script>
 <script src="dados.js"></script>
 <script>
 /* medidas da peça andar.png (2110 x 486) e dos buracos das janelas */
@@ -836,7 +898,7 @@ function buscar(nome){
 }
 function abrirApe(nome,silencioso){
   const a=acharMorador(nome); if(!a) return;
-  apeNome=nome; const m=a.m, mv=m.mv||{}, h=restante(m);
+  apeNome=nome; const m=a.m, mv=Object.assign({},m.mv||{},usoDe(nome)), h=restante(m);
   const tipo=a.vip?'cobertura_vip':QUARTO[a.bloco.bairro]||'vila';
   const andar=a.vip?null:ANDARES-Math.floor(a.i/POR_ANDAR);
   let q=`<img class="fundo" src="img/q_${tipo}.jpg" alt="apê de @${esc(m.u)}">`;
@@ -866,10 +928,13 @@ function abrirApe(nome,silencioso){
     `<h2>@${esc(m.u)}</h2>`
     +`<div class="onde">📍 ${a.k==='CAP'?'Capital Aura':esc(a.c.nome)} · ${a.vip?'👑 Cobertura VIP':`Bloco ${a.b+1} · ${andar}º andar · ${esc(a.bloco.bairro)}`}</div>`
     +`<div class="aluga">⏳<i><b style="width:${pct}%;background:${corAluguel(h)}"></b></i>${m.atrasado?'atrasado':fmtTempo(m)}</div>`
-    +`<div class="grade"><div><b>${m.auras}</b><small>AURAs no mês</small></div><div><b>${(m.br||0).toLocaleString('pt-BR')}</b><small>🔥 Brasas</small></div>`
+    +`<div class="grade"><div><b>${m.auras}</b><small>AURAs no mês</small></div><div><b>${(lojaEstado&&lojaEstado.u===m.u?lojaEstado.saldo:m.br||0).toLocaleString('pt-BR')}</b><small>🔥 Brasas</small></div>`
     +`<div><b>${pos>=0?pos+1+'º':'—'}</b><small>no ranking</small></div><div><b>${desde}</b><small>mora desde</small></div></div>`
     +prox
-    +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`;
+    +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`
+    +(Casa.ligada?`<div class="botoes dois"><button class="loja" id="apeLoja">${Casa.sessao&&Casa.sessao.u===m.u?'🛍️ Lojinha · decorar meu quarto':'🔑 É meu quarto? Entrar'}</button></div>`:'');
+  if(Casa.ligada) document.getElementById('apeLoja').onclick=()=>Casa.sessao&&Casa.sessao.u===m.u?abrirLoja():abrirEntrar(m.u);
+  pedirUso(nome);
   document.getElementById('apeVerPredio').onclick=()=>voarPara('predio',()=>{ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; montar(); setTimeout(()=>mostrarNoPredio(m.u),50); });
   document.getElementById('apeCompartilhar').onclick=()=>abrirCartao(a,pos);
   if(!silencioso) boasVindas(m);
@@ -895,6 +960,108 @@ document.getElementById('andares').addEventListener('click',e=>{ const ap=e.targ
 document.getElementById('vip').addEventListener('click',()=>{ const v=C().vip; if(v) voarPara('ape',()=>abrirApe(v.u),document.getElementById('vip')); });
 
 /* ===== Ranking ===== */
+/* ===== Entrar + Lojinha (banco Supabase; sem banco configurado = modo simulação no próprio aparelho) ===== */
+const PECAS=[['cama','🛏️ Cama'],['sofa','🛋️ Sofá'],['tapete','🟫 Tapete'],['planta','🪴 Planta'],['luminaria','💡 Luminária'],['cortina','🪟 Cortina'],['quadro','🖼️ Quadro']];
+const PRECO={1:30,2:80,3:200,4:450,5:900};
+const ERROS={NAO_MORA:'Esse @ ainda não mora no prédio. Comente AURA num post do @comenteaura!',SENHA_ERRADA:'Senha errada. Confira na sua DM do Instagram.',
+  BLOQUEADO:'Muitas tentativas erradas. Espere 15 minutos e tente de novo.',SEM_BRASAS:'Faltam Brasas. Comente AURA pra ganhar mais 🔥',
+  JA_TEM:'Você já tem essa peça.',NAO_TEM:'Você ainda não tem essa peça.',REDE:'Sem conexão agora. Tente de novo em instantes.'};
+const BANCO=window.AURA_BANCO||{};
+const Casa={
+  /* modo teste só no PC (localhost) ou com ?lojasim; no site público sem banco o botão nem aparece */
+  simulado:params.has('lojasim')||(!BANCO.url&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname)),
+  get ligada(){ return !!BANCO.url||this.simulado; },
+  sessao:null,
+  async rpc(fn,args){
+    if(this.simulado) return this.sim(fn,args);
+    let r; try{ r=await fetch(BANCO.url.replace(/\/$/,'')+'/rest/v1/rpc/'+fn,{method:'POST',
+      headers:{apikey:BANCO.chave,Authorization:'Bearer '+BANCO.chave,'Content-Type':'application/json'},body:JSON.stringify(args)}); }
+    catch(e){ throw new Error('REDE'); }
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok){ const c=Object.keys(ERROS).find(k=>(j.message||'').includes(k)); throw new Error(c||'REDE'); }
+    return j;
+  },
+  /* simulação: tudo fica só neste aparelho; senha de teste = TESTE-1234 */
+  sim(fn,{p_u,p_senha,p_peca,p_nivel}){
+    const u=(p_u||'').trim().replace(/^@/,'').toLowerCase(), a=acharMorador(u);
+    if(!a) throw new Error('NAO_MORA');
+    if((p_senha||'').replace(/\s/g,'').toUpperCase()!=='TESTE-1234') throw new Error('SENHA_ERRADA');
+    let q={compras:{},uso:{},gasto:0}; try{ q=JSON.parse(localStorage.getItem('aura_sim_'+u))||q; }catch(e){}
+    const pres={...(a.m.mv||{})}, ganhas=a.m.br||0, tem=(p,n)=>n<=(pres[p]||0)||(q.compras[p]||[]).includes(n);
+    if(fn==='comprar'){ if(tem(p_peca,p_nivel)) throw new Error('JA_TEM'); if(ganhas-q.gasto<PRECO[p_nivel]) throw new Error('SEM_BRASAS');
+      (q.compras[p_peca]=q.compras[p_peca]||[]).push(p_nivel); q.uso[p_peca]=p_nivel; q.gasto+=PRECO[p_nivel]; }
+    if(fn==='usar'){ if(p_nivel&&!tem(p_peca,p_nivel)) throw new Error('NAO_TEM'); q.uso[p_peca]=p_nivel; }
+    try{ localStorage.setItem('aura_sim_'+u,JSON.stringify(q)); }catch(e){}
+    usoCache[u]=q.uso;
+    return {u,ganhas,presentes:pres,compras:q.compras,uso:q.uso,gasto:q.gasto,saldo:ganhas-q.gasto};
+  }
+};
+try{ const s=JSON.parse(localStorage.getItem('aura_sessao')); if(s&&s.u&&s.senha) Casa.sessao=s; }catch(e){}
+/* quarto decorado de qualquer pessoa (público) */
+const usoCache={};
+function usoDe(u){ return usoCache[u]||{}; }
+async function pedirUso(u){
+  if(Casa.simulado){ try{ const q=JSON.parse(localStorage.getItem('aura_sim_'+u)); if(q&&JSON.stringify(q.uso)!==JSON.stringify(usoCache[u]||{})){ usoCache[u]=q.uso; if(apeNome===u) abrirApe(u,true); } }catch(e){} return; }
+  try{ const r=await fetch(BANCO.url.replace(/\/$/,'')+'/rest/v1/quartos?select=uso&u=eq.'+encodeURIComponent(u),{headers:{apikey:BANCO.chave,Authorization:'Bearer '+BANCO.chave}});
+    const j=await r.json(); const uso=(j[0]&&j[0].uso)||{};
+    if(JSON.stringify(uso)!==JSON.stringify(usoCache[u]||{})){ usoCache[u]=uso; if(apeNome===u&&vista==='ape') abrirApe(u,true); } }catch(e){}
+}
+function abrirEntrar(u){
+  document.getElementById('entU').value='@'+u; document.getElementById('entSenha').value=''; document.getElementById('entErro').textContent='';
+  document.getElementById('entSim').innerHTML=Casa.simulado?'<span class="simulacao">MODO TESTE · senha TESTE-1234 · nada é salvo no servidor</span>':'';
+  document.getElementById('entrar').hidden=false; setTimeout(()=>document.getElementById('entSenha').focus(),50);
+}
+document.getElementById('entrarFechar').onclick=()=>document.getElementById('entrar').hidden=true;
+document.getElementById('entSenha').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('entOk').click(); });
+document.getElementById('entOk').onclick=async()=>{
+  const u=document.getElementById('entU').value.trim().replace(/^@/,'').toLowerCase(), senha=document.getElementById('entSenha').value.replace(/\s/g,'').toUpperCase();
+  const er=document.getElementById('entErro');
+  if(!u){ er.textContent='Digite seu @.'; return; } if(senha.length<8){ er.textContent='Digite a senha que chegou na sua DM (ex.: K7PX-3MWA).'; return; }
+  er.textContent='Conferindo…';
+  try{ lojaEstado=await Casa.rpc('entrar',{p_u:u,p_senha:senha}); }
+  catch(e){ er.textContent=ERROS[e.message]||ERROS.REDE; return; }
+  Casa.sessao={u,senha}; try{ localStorage.setItem('aura_sessao',JSON.stringify(Casa.sessao)); }catch(e){}
+  document.getElementById('entrar').hidden=true;
+  if(apeNome!==u) buscar(u); else abrirApe(u,true);
+  abrirLoja();
+};
+let lojaEstado=null, lojaPeca='cama';
+async function abrirLoja(){
+  document.getElementById('loja').hidden=false; lojaMsg('Abrindo…');
+  try{ lojaEstado=await Casa.rpc('entrar',{p_u:Casa.sessao.u,p_senha:Casa.sessao.senha}); lojaMsg(''); }
+  catch(e){ if(e.message==='SENHA_ERRADA'||e.message==='NAO_MORA'){ sairLoja(); abrirEntrar(Casa.sessao?Casa.sessao.u:apeNome); } else lojaMsg(ERROS[e.message]||ERROS.REDE,true); return; }
+  desenharLoja();
+}
+function lojaMsg(t,erro){ const el=document.getElementById('lojaMsg'); el.textContent=t; el.classList.toggle('erro',!!erro); }
+function temPeca(p,n){ const e=lojaEstado; return n<=((e.presentes||{})[p]||0)||((e.compras||{})[p]||[]).includes(n); }
+function usandoPeca(p){ const e=lojaEstado; return p in (e.uso||{})?e.uso[p]:((e.presentes||{})[p]||0); }
+function desenharLoja(){
+  const e=lojaEstado; document.getElementById('lojaBrasas').textContent=(e.saldo||0).toLocaleString('pt-BR');
+  document.getElementById('lojaPecas').innerHTML=PECAS.map(([p,n])=>`<button data-p="${p}" class="${p===lojaPeca?'ativo':''}">${n}</button>`).join('');
+  const usa=usandoPeca(lojaPeca);
+  document.getElementById('lojaGrade').innerHTML=[1,2,3,4,5].map(n=>{
+    const tem=temPeca(lojaPeca,n), falta=PRECO[n]-(e.saldo||0);
+    const bt=usa===n?'<button class="tenho" disabled>✓ No quarto</button>':tem?`<button class="tenho" data-usar="${n}">Usar</button>`
+      :falta>0?`<button class="falta" disabled>Faltam ${falta} 🔥</button>`:`<button data-comprar="${n}">Comprar · ${PRECO[n]} 🔥</button>`;
+    return `<div class="lojaItem ${usa===n?'usando':''}"><img src="img/m_${lojaPeca}${n}.png" alt="${lojaPeca} nível ${n}" loading="lazy"><small>Nível ${n}${tem?' · é seu':''}</small>${bt}</div>`;
+  }).join('');
+  document.getElementById('lojaGuardar').hidden=!usa;
+}
+async function lojaAcao(fn,nivel){
+  lojaMsg('Um instante…');
+  try{ lojaEstado=await Casa.rpc(fn,{p_u:Casa.sessao.u,p_senha:Casa.sessao.senha,p_peca:lojaPeca,p_nivel:nivel}); }
+  catch(e){ lojaMsg(ERROS[e.message]||ERROS.REDE,true); return; }
+  usoCache[Casa.sessao.u]=lojaEstado.uso; lojaMsg(fn==='comprar'?'Comprado! Já está no seu quarto 🎉':nivel?'Pronto, trocado!':'Guardado.');
+  desenharLoja(); if(apeNome===Casa.sessao.u) abrirApe(apeNome,true);
+}
+document.getElementById('lojaPecas').addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(!b) return; lojaPeca=b.dataset.p; lojaMsg(''); desenharLoja(); });
+document.getElementById('lojaGrade').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.comprar) lojaAcao('comprar',+b.dataset.comprar); else if(b.dataset.usar) lojaAcao('usar',+b.dataset.usar); });
+document.getElementById('lojaGuardar').onclick=()=>lojaAcao('usar',0);
+document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja').hidden=true;
+function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); }
+document.getElementById('lojaSair').onclick=sairLoja;
+
 let rkPeriodo='mes', rkRegiao='BR';
 const RK_REG=[['BR','Brasil'],['CAP','Capital'],['N','Norte'],['NE','Nordeste'],['CO','C.-Oeste'],['SE','Sudeste'],['S','Sul']];
 function listaRanking(){

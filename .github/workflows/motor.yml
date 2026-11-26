@@ -39,6 +39,9 @@ jobs:
       - name: Roda os ciclos (a cada 10 min, por ~5h50)
         env:
           IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          AURA_SEGREDO: ${{ secrets.AURA_SEGREDO }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           AURA_SEM_PUBLICAR: "1"
           AURA_DEPLOY: ${{ github.workspace }}/publicado
           TZ: America/Sao_Paulo
