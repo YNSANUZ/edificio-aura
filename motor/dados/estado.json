@@ -1,7 +1,7 @@
 {
  "moradores": {
   "gatito.anime": {
-   "personagem": 19,
+   "personagem": 16,
    "pago_ate": "2026-12-08T02:50:26+00:00",
    "auras": [
     "2026-11-26T14:50:26+00:00",
@@ -13,11 +13,11 @@
    "total_auras": 2,
    "regiao": "SE",
    "regiao_auto": true,
-   "ultimo_cid": "18399361324203957",
-   "ultimo_cid_em": "2026-11-26T18:54:30+00:00"
+   "ultimo_cid": "18400940833165578",
+   "ultimo_cid_em": "2026-11-26T19:06:58+00:00"
   },
   "brunoleaod": {
-   "personagem": 9,
+   "personagem": 3,
    "pago_ate": "2026-12-26T18:43:54+00:00",
    "auras": [
     "2026-11-26T18:43:54+00:00"
@@ -25,8 +25,8 @@
    "status": "ativo",
    "entrou_em": "2026-11-26T18:43:54+00:00",
    "ultimo_aura": "2026-11-26T18:43:54+00:00",
-   "ultimo_cid": "17908344501602632",
-   "ultimo_cid_em": "2026-11-26T18:44:00+00:00",
+   "ultimo_cid": "18165489121552533",
+   "ultimo_cid_em": "2026-11-26T19:06:13+00:00",
    "regiao": "CO",
    "total_auras": 1
   }
@@ -42,7 +42,9 @@
   "18139512352734986",
   "17916809016475082",
   "17908344501602632",
-  "18399361324203957"
+  "18399361324203957",
+  "18165489121552533",
+  "18400940833165578"
  ],
  "eventos": [
   {
@@ -75,6 +77,18 @@
    "tipo": "novo_top1",
    "quando": "2026-11-26T19:01:10+00:00",
    "usuario": "gatito.anime"
+  },
+  {
+   "tipo": "trocou_personagem",
+   "quando": "2026-11-26T19:06:13+00:00",
+   "usuario": "brunoleaod",
+   "personagem": 3
+  },
+  {
+   "tipo": "trocou_personagem",
+   "quando": "2026-11-26T19:06:58+00:00",
+   "usuario": "gatito.anime",
+   "personagem": 16
   }
  ],
  "top1": "gatito.anime",
