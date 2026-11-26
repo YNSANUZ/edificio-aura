@@ -42,6 +42,8 @@ jobs:
           AURA_SEGREDO: ${{ secrets.AURA_SEGREDO }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          IG_DM_TOKEN: ${{ secrets.IG_DM_TOKEN }}
+          PAGE_TOKEN: ${{ secrets.PAGE_TOKEN }}
           AURA_SEM_PUBLICAR: "1"
           AURA_DEPLOY: ${{ github.workspace }}/publicado
           TZ: America/Sao_Paulo
