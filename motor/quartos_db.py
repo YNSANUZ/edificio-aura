@@ -120,3 +120,17 @@ def visualizacoes() -> dict:
                                  headers={"apikey": chave, "Authorization": "Bearer " + chave})
     with urllib.request.urlopen(req, timeout=30) as r:
         return {x["u"]: x["views"] for x in json.loads(r.read().decode())}
+
+
+def apagar_no_banco(usuario: str) -> None:
+    """Pedido de exclusão de dados: tira o morador de todas as tabelas do banco."""
+    url, chave = _env("SUPABASE_URL"), _env("SUPABASE_SERVICE_KEY")
+    if not (url and chave):
+        return
+    u = urllib.parse.quote(usuario)
+    for tabela, filtro in [("moradores", f"u=eq.{u}"), ("quartos", f"u=eq.{u}"), ("stats_quarto", f"u=eq.{u}"),
+                           ("curtidas", f"or=(dono.eq.{u},visitante.eq.{u})"), ("visitas", f"or=(dono.eq.{u},visitante.eq.{u})"),
+                           ("lemas", f"por=eq.{u}")]:
+        req = urllib.request.Request(f"{url.rstrip('/')}/rest/v1/{tabela}?{filtro}", method="DELETE",
+                                     headers={"apikey": chave, "Authorization": "Bearer " + chave})
+        urllib.request.urlopen(req, timeout=30).read()

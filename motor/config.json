@@ -120,5 +120,6 @@
     ],
     "max_por_ciclo": 20
   },
-  "despejo_so_quando_lota": true
+  "despejo_so_quando_lota": true,
+  "apagar_usuarios": []
 }

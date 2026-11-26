@@ -641,6 +641,20 @@ def gravar_regras_md(destino: Path, agora: datetime | None = None) -> None:
     destino.write_text("\n".join(linhas) + "\n", encoding="utf-8")
 
 
+def apagar_pedidos(estado: dict) -> list[str]:
+    """Exclusão de dados (privacidade): quem está em config "apagar_usuarios" sai do jogo.
+    Os comentários antigos já lidos não voltam; se comentar AURA de novo, entra como morador novo."""
+    feitos = []
+    for u in [x.lower().lstrip("@") for x in CONFIG.get("apagar_usuarios", [])]:
+        if u in estado["moradores"]:
+            del estado["moradores"][u]
+            feitos.append(u)
+        for k in ("dm_enviadas", "banco", "cargos"):
+            estado.get(k, {}).pop(u, None)
+        estado["eventos"] = [e for e in estado["eventos"] if e.get("usuario") != u]
+    return feitos
+
+
 def aplicar_lote(estado: dict, comentarios: list[dict], agora: datetime) -> dict:
     """Processa comentários em ordem de horário e despeja quem venceu no meio do caminho."""
     contagem: dict[str, int] = {}

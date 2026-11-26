@@ -49,6 +49,13 @@ def ciclo_real() -> None:
         log(f"ERRO na coleta, ciclo cancelado sem mudanças: {e}")
         return
     resumo = M.aplicar_lote(estado, comentarios, agora)
+    for u in M.apagar_pedidos(estado):   # pedidos de exclusão de dados (config "apagar_usuarios")
+        try:
+            import quartos_db
+            quartos_db.apagar_no_banco(u)
+        except Exception as e:
+            log(f"Exclusão de @{u}: banco falhou ({str(e)[:100]})")
+        log(f"Dados de @{u} apagados a pedido")
     try:  # Brasas e móveis de presente vão para o banco da lojinha (se já estiver configurado)
         import quartos_db
         n_curt = M.creditar_curtidas(estado, quartos_db.curtidas_novas(estado), agora)
