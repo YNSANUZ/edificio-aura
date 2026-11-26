@@ -18,7 +18,7 @@
   },
   "brunoleaod": {
    "personagem": 3,
-   "pago_ate": "2026-12-26T18:43:54+00:00",
+   "pago_ate": "2026-12-26T20:43:54+00:00",
    "auras": [
     "2026-11-26T18:43:54+00:00"
    ],
@@ -28,7 +28,8 @@
    "ultimo_cid": "18165489121552533",
    "ultimo_cid_em": "2026-11-26T19:06:13+00:00",
    "regiao": "CO",
-   "total_auras": 1
+   "total_auras": 1,
+   "curtidas": 1
   }
  },
  "comentarios_vistos": [
@@ -92,7 +93,9 @@
   }
  ],
  "top1": "gatito.anime",
- "curtidas_vistas": [],
+ "curtidas_vistas": [
+  "brunoleaod|gatito.anime|2026-11-26"
+ ],
  "banco": {
   "gatito.anime": "20|{\"cama\": 1, \"planta\": 1}|2966effa",
   "brunoleaod": "10|{\"cama\": 1}|562273a9"
