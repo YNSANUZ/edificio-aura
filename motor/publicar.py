@@ -66,7 +66,7 @@ def copiar_site(modo: str) -> None:
             shutil.copytree(item, alvo, dirs_exist_ok=True)
         else:
             shutil.copy2(item, alvo)
-    (DEPLOY / "CNAME").write_text(DOMINIO + "\n", encoding="utf-8")
+    (DEPLOY / "CNAME").write_bytes((DOMINIO + "\n").encode())   # sem \r do Windows
     (DEPLOY / ".nojekyll").write_text("", encoding="utf-8")
 
 
