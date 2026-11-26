@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Edifício Aura</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -143,6 +144,24 @@
           padding:3px 0 2px; line-height:1.1}
   .menu a img{height:24px; display:block; margin:0 auto 1px}
   .menu a.on{background:var(--amarelo); color:var(--carvao)}
+  .menu a .emo{display:block; font-size:20px; line-height:24px; height:24px}
+  /* ===== Praça Aura 3D ===== */
+  body.v-aura3d .ceu, body.v-aura3d .predio, body.v-aura3d .rua, body.v-aura3d .praca, body.v-aura3d .cidade, body.v-aura3d .brasil,
+  body.v-aura3d .ape, body.v-aura3d .rank, body.v-aura3d #ant, body.v-aura3d #prox{display:none}
+  body:not(.v-aura3d) .aura3d{display:none}
+  .aura3d{position:relative; margin:4px 10px 0; height:calc(100vh - 300px); height:calc(100dvh - 300px); min-height:380px; border:4px solid var(--carvao);
+        border-radius:22px; overflow:hidden; background:#ffcf9e}
+  .aura3d .palco3d{position:absolute; inset:0} .aura3d canvas{display:block; touch-action:none}
+  .aura3d .carregando{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--carvao)}
+  .aura3d .topo3d{position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; gap:6px; pointer-events:none}
+  .aura3d .chip3d{pointer-events:auto; background:#fff8ee; border:3px solid var(--carvao); border-radius:14px; padding:1px 10px;
+        font-weight:800; font-size:14px; color:var(--carvao)}
+  .aura3d .base3d{position:absolute; left:8px; right:8px; bottom:8px; background:#fff8ee; border:3px solid var(--carvao); border-radius:16px;
+        padding:6px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center}
+  .aura3d .base3d button{border:2px solid var(--carvao); border-radius:12px; background:#fff; font:800 13px 'Baloo 2',sans-serif;
+        padding:1px 9px; cursor:pointer; color:var(--carvao)}
+  .aura3d .base3d button.forte{background:var(--amarelo)}
+  .aura3d .base3d small{width:100%; text-align:center; font-weight:700; font-size:12px; color:#8a5a3a}
   .chip button{border:0;background:var(--carvao);color:var(--amarelo);border-radius:9px;width:26px;height:26px;font:800 14px 'Baloo 2',sans-serif;cursor:pointer;padding:0}
   .chip button:disabled{opacity:.25;cursor:default}
   .aviso{margin-top:8px;background:var(--brasa);color:#fff;border-radius:14px;padding:3px 12px;font-weight:800;font-size:14px;
@@ -459,6 +478,11 @@
     <div class="quarto" id="quarto"></div>
     <div class="ficha" id="fichaApe"></div>
   </section>
+  <section class="aura3d" id="aura3d" aria-label="Praça Aura em 3D">
+    <div class="palco3d" id="palco3d"><div class="carregando">Abrindo a praça… 🔥</div></div>
+    <div class="topo3d"><span class="chip3d">🌳 Praça Aura</span><span class="chip3d" id="naPraca">👥 0 na praça</span></div>
+    <div class="base3d" id="base3d"></div>
+  </section>
   <section class="rank" id="ranking">
     <div class="rkTopo">
       <h2>🏆 Ranking</h2>
@@ -548,6 +572,7 @@
   <a href="#" id="irBrasil"><img src="img/chama_simples.png" alt="">Brasil</a>
   <a href="#" id="irCidade"><img src="img/ic_pino.png" alt="">Cidade</a>
   <a href="#" id="irPredio"><img src="img/ic_predio.png" alt="">Prédio</a>
+  <a href="#" id="irAura3d"><span class="emo" aria-hidden="true">🌳</span>Praça</a>
   <a href="#" id="irRanking"><img src="img/ic_coroa.png" alt="">Ranking</a>
   <a href="#" id="abrirRegras"><img src="img/ic_sino.png" alt="">Regras</a>
   <a href="#" id="irApe"><img src="img/ic_casa.png" alt="">Meu Apê</a>
@@ -696,7 +721,7 @@ document.getElementById('busca').addEventListener('submit',e=>{e.preventDefault(
 /* atualiza sozinho: recarrega dados.js a cada 60 s */
 function recarregar(){
   const s=document.createElement('script'); s.src='dados.js?t='+Date.now();
-  s.onload=()=>{ if(window.DADOS){ D=window.DADOS; blocoAtual=Math.min(blocoAtual,nBlocos()-1); montar(); if(vista==='cidade') montarCidade(); if(vista==='brasil') montarBrasil(); if(vista==='ranking') montarRanking(); if(vista==='ape'&&apeNome) abrirApe(apeNome,true); else { const q=document.getElementById('q').value; if(q&&vista==='predio') mostrarNoPredio(q);} } s.remove(); };
+  s.onload=()=>{ if(window.DADOS){ D=window.DADOS; blocoAtual=Math.min(blocoAtual,nBlocos()-1); montar(); if(vista==='cidade') montarCidade(); if(vista==='brasil') montarBrasil(); if(vista==='ranking') montarRanking(); if(vista==='aura3d'&&praca3d){ praca3d.sincronizar(D); base3d(); } if(vista==='ape'&&apeNome) abrirApe(apeNome,true); else { const q=document.getElementById('q').value; if(q&&vista==='predio') mostrarNoPredio(q);} } s.remove(); };
   document.body.appendChild(s);
 }
 
@@ -764,7 +789,9 @@ document.getElementById('mapaCoisas').addEventListener('click',e=>{
   if(e.target.closest('#fonteMapa')) voarPara('predio',()=>setTimeout(()=>document.getElementById('praca').scrollIntoView({behavior:'smooth'}),400),e.target.closest('#fonteMapa'));
 });
 function ver(v){
-  vista=v; document.body.classList.toggle('v-cidade',v==='cidade'); document.body.classList.toggle('v-brasil',v==='brasil'); document.body.classList.toggle('v-ape',v==='ape'); document.body.classList.toggle('v-ranking',v==='ranking');
+  vista=v; document.body.classList.toggle('v-cidade',v==='cidade'); document.body.classList.toggle('v-brasil',v==='brasil'); document.body.classList.toggle('v-ape',v==='ape'); document.body.classList.toggle('v-ranking',v==='ranking'); document.body.classList.toggle('v-aura3d',v==='aura3d');
+  document.getElementById('irAura3d').classList.toggle('on',v==='aura3d');
+  if(v==='aura3d') abrirPraca3d(); else if(praca3d) praca3d.desligar();
   document.getElementById('irRanking').classList.toggle('on',v==='ranking');
   document.getElementById('irApe').classList.toggle('on',v==='ape');
   document.getElementById('irBrasil').classList.toggle('on',v==='brasil');
@@ -1037,6 +1064,7 @@ document.getElementById('entOk').onclick=async()=>{
   catch(e){ er.textContent=ERROS[e.message]||ERROS.REDE; return; }
   Casa.sessao={u,senha}; try{ localStorage.setItem('aura_sessao',JSON.stringify(Casa.sessao)); }catch(e){}
   document.getElementById('entrar').hidden=true;
+  if(vista==='aura3d'){ base3d(); return; }
   if(apeNome!==u) buscar(u); else abrirApe(u,true);
   abrirLoja();
 };
@@ -1074,8 +1102,42 @@ document.getElementById('lojaGrade').addEventListener('click',e=>{ const b=e.tar
   if(b.dataset.comprar) lojaAcao('comprar',+b.dataset.comprar); else if(b.dataset.usar) lojaAcao('usar',+b.dataset.usar); });
 document.getElementById('lojaGuardar').onclick=()=>lojaAcao('usar',0);
 document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja').hidden=true;
-function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); }
+function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); if(praca3d) base3d(); }
 document.getElementById('lojaSair').onclick=sairLoja;
+
+/* ===== Praça Aura 3D (three.js, carregada só quando abre a aba) ===== */
+let praca3d=null, praca3dCarregando=false;
+function moradorDe(u){ const a=acharMorador(u); return a&&a.m; }
+async function abrirPraca3d(){
+  window.scrollTo(0,0);
+  if(praca3d){ praca3d.ligar(); praca3d.sincronizar(D); base3d(); return; }
+  if(praca3dCarregando) return; praca3dCarregando=true;
+  try{
+    const mod=await import('./praca3d.js');
+    const palco=document.getElementById('palco3d'); palco.innerHTML='';
+    praca3d=mod.abrir(palco,{ D:()=>D, abrirApe:u=>{ buscar(u); } });
+    if(vista!=='aura3d') praca3d.desligar();
+    base3d();
+  }catch(e){ document.getElementById('palco3d').innerHTML='<div class="carregando">Não deu pra abrir a praça 3D neste aparelho. 😕</div>'; }
+  praca3dCarregando=false;
+}
+function base3d(){
+  const el=document.getElementById('base3d'); if(!praca3d) return;
+  const n=Object.values(D.cidades||{}).reduce((s,c)=>s+(c.total_moradores||0),0);
+  document.getElementById('naPraca').textContent=`👥 ${n} morador${n===1?'':'es'}`;
+  const s=Casa.sessao, m=s&&moradorDe(s.u);
+  if(s&&m){
+    if(!praca3d.eu||praca3d.eu.u!==s.u) praca3d.entrarComo(s.u,m.p||1);
+    el.innerHTML=praca3d.FRASES.map((f,i)=>`<button data-f="${i}">${f}</button>`).join('')+'<small>Toque no chão pra andar · toque num vizinho pra ver o apê dele</small>';
+  } else {
+    if(praca3d.eu) praca3d.sair();
+    el.innerHTML=(Casa.ligada?'<button class="forte" id="p3Entrar">🔑 Entrar pra andar e falar</button>':'')
+      +'<small>Toque num morador pra ver o apê dele'+(Casa.ligada?' · quem entra com @ e senha anda e conversa':'')+'</small>';
+    const b=document.getElementById('p3Entrar'); if(b) b.onclick=()=>abrirEntrar(apeNome||'');
+  }
+}
+document.getElementById('base3d').addEventListener('click',e=>{ const b=e.target.closest('[data-f]'); if(b&&praca3d) praca3d.falar(praca3d.FRASES[+b.dataset.f]); });
+document.getElementById('irAura3d').onclick=e=>{ e.preventDefault(); if(vista!=='aura3d') ver('aura3d'); };
 
 let rkPeriodo='mes', rkRegiao='BR';
 const RK_REG=[['BR','Brasil'],['CAP','Capital'],['N','Norte'],['NE','Nordeste'],['CO','C.-Oeste'],['SE','Sudeste'],['S','Sul']];
