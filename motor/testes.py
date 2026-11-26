@@ -1,5 +1,6 @@
 """Testes das regras do Edifício Aura. Rode: python testes.py"""
 import unittest
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import tempfile
@@ -187,6 +188,20 @@ class Regras(unittest.TestCase):
         sem = M.ranking_semana(self.e, T0 + timedelta(hours=12))
         self.assertEqual([(x["u"], x["n"]) for x in sem], [("ana", 3), ("bia", 1)])
         self.assertEqual(M.ranking_semana(self.e, T0 + timedelta(days=9)), [])   # passou a semana, zera
+
+    def test_senha_do_quarto(self):
+        import hashlib, quartos_db as Q
+        s1, s2 = Q.senha_de("Ana", "segredo-teste"), Q.senha_de("ana", "segredo-teste")
+        self.assertEqual(s1, s2)                                  # @ com maiúscula dá a mesma senha
+        self.assertRegex(s1, r"^[A-Z2-9]{4}-[A-Z2-9]{4}$")
+        self.assertNotEqual(s1, Q.senha_de("bia", "segredo-teste"))
+        self.assertNotEqual(s1, Q.senha_de("ana", "outro-segredo"))
+        sal, h = Q.embaralhar("ana", " " + s1.lower() + " ", "segredo-teste")   # banco aceita minúscula/espaço
+        self.assertEqual(h, hashlib.sha256((sal + s1).encode()).hexdigest())
+        M.aplicar_lote(self.e, [c(i, "ana", "AURA", i * 200) for i in range(4)], T0 + timedelta(hours=14))
+        (ln,) = Q.linhas(self.e, "segredo-teste")
+        self.assertEqual((ln["u"], ln["brasas_ganhas"], ln["presentes"]["tapete"]), ("ana", 40, 1))
+        self.assertNotIn(s1, json.dumps(self.e))                  # a senha nunca vai pro estado público
 
 
 if __name__ == "__main__":

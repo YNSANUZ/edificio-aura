@@ -1,0 +1,91 @@
+"""Senha do quarto de cada morador + envio das Brasas/presentes para o banco (Supabase).
+
+A senha NUNCA é guardada em lugar nenhum: ela é calculada na hora a partir do @ e de um segredo
+(AURA_SEGREDO, que fica só no motor/.env e nos segredos do GitHub). Assim o motor consegue mandar a
+mesma senha de novo por DM quando precisar, e o estado público do prédio não revela nada.
+No banco vai só a senha embaralhada (sal + sha256).
+
+Variáveis (motor/.env ou ambiente):
+  AURA_SEGREDO          texto longo e aleatório (não mude depois: mudaria a senha de todo mundo)
+  SUPABASE_URL          https://xxxx.supabase.co
+  SUPABASE_SERVICE_KEY  chave "service_role" (secreta)
+"""
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import os
+import urllib.request
+
+import motor as M
+
+ALFABETO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"   # sem 0/O, 1/I/L para não confundir
+
+
+def _env(nome: str) -> str:
+    v = os.environ.get(nome)
+    if v:
+        return v
+    try:
+        import coletor_instagram as IG
+        return IG.ler_env().get(nome, "")
+    except Exception:
+        return ""
+
+
+def senha_de(usuario: str, segredo: str | None = None) -> str:
+    """Senha fixa do quarto: 8 letras/números, em dois grupos (ex.: K7PX-3MWA)."""
+    segredo = segredo or _env("AURA_SEGREDO")
+    if not segredo:
+        raise RuntimeError("Falta AURA_SEGREDO")
+    h = hmac.new(segredo.encode(), ("quarto:" + usuario.lower()).encode(), hashlib.sha256).digest()
+    c = "".join(ALFABETO[b % len(ALFABETO)] for b in h[:8])
+    return c[:4] + "-" + c[4:]
+
+
+def embaralhar(usuario: str, senha: str, segredo: str | None = None) -> tuple[str, str]:
+    """(sal, hash) do jeito que o banco confere: sha256(sal + senha sem espaços, maiúscula)."""
+    segredo = segredo or _env("AURA_SEGREDO")
+    sal = hmac.new(segredo.encode(), ("sal:" + usuario.lower()).encode(), hashlib.sha256).hexdigest()[:16]
+    return sal, hashlib.sha256((sal + senha.replace(" ", "").upper()).encode()).hexdigest()
+
+
+def linhas(estado: dict, segredo: str | None = None) -> list[dict]:
+    """Uma linha por morador (inclusive despejados: o quarto deles volta junto)."""
+    cfg = M.CONFIG.get("brasas_por_aura", 10)
+    out = []
+    for u, m in estado.get("moradores", {}).items():
+        tot = m.get("total_auras", 0)
+        sal, h = embaralhar(u, senha_de(u, segredo), segredo)
+        out.append({"u": u, "sal": sal, "senha_hash": h, "brasas_ganhas": tot * cfg,
+                    "presentes": {k: v for k, v in M.moveis_de(tot).items() if v}})
+    return out
+
+
+def sincronizar(estado: dict) -> str:
+    """Manda para o banco só quem mudou desde a última vez (marca em estado['banco'])."""
+    url, chave, seg = _env("SUPABASE_URL"), _env("SUPABASE_SERVICE_KEY"), _env("AURA_SEGREDO")
+    if not (url and chave and seg):
+        return "banco ainda não configurado (pulei)"
+    marcas = estado.setdefault("banco", {})
+    novas = []
+    for ln in linhas(estado, seg):
+        assinatura = f"{ln['brasas_ganhas']}|{json.dumps(ln['presentes'], sort_keys=True)}|{ln['senha_hash'][:8]}"
+        if marcas.get(ln["u"]) != assinatura:
+            novas.append((ln, assinatura))
+    if not novas:
+        return "banco em dia"
+    for i in range(0, len(novas), 500):
+        lote = novas[i:i + 500]
+        req = urllib.request.Request(
+            url.rstrip("/") + "/rest/v1/moradores?on_conflict=u", method="POST",
+            data=json.dumps([ln for ln, _ in lote]).encode(),
+            headers={"apikey": chave, "Authorization": "Bearer " + chave, "Content-Type": "application/json",
+                     "Prefer": "resolution=merge-duplicates,return=minimal"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            if r.status >= 300:
+                raise RuntimeError(f"banco respondeu {r.status}")
+        for ln, a in lote:
+            marcas[ln["u"]] = a
+    return f"banco: {len(novas)} morador(es) atualizado(s)"

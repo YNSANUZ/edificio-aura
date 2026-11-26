@@ -49,6 +49,13 @@ def ciclo_real() -> None:
         log(f"ERRO na coleta, ciclo cancelado sem mudanças: {e}")
         return
     resumo = M.aplicar_lote(estado, comentarios, agora)
+    try:  # Brasas e móveis de presente vão para o banco da lojinha (se já estiver configurado)
+        import quartos_db
+        msg_banco = quartos_db.sincronizar(estado)
+        if "pulei" not in msg_banco and "em dia" not in msg_banco:
+            log(msg_banco)
+    except Exception as e:  # banco fora do ar não pode parar o prédio
+        log(f"Banco da lojinha: não consegui atualizar agora ({str(e)[:150]})")
     M.salvar(estado)
     dados = M.exportar(estado, agora, SITE)
     M.gravar_regras_md(REGRAS_MD, agora)
