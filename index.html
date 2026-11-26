@@ -121,6 +121,14 @@
   .caixa h2{margin:0 30px 6px 0; font-size:22px}
   .caixa ol{margin:0; padding-left:22px; font-size:15px; font-weight:600; line-height:1.35}
   .caixa li{margin:6px 0}
+  .caixa ol.linhas{list-style:none; padding:0}
+  .caixa ol.linhas li{display:flex; gap:10px; align-items:flex-start; margin:0; padding:9px 2px; border-bottom:1px dashed #0002}
+  .caixa ol.linhas li:last-child{border-bottom:0}
+  .caixa ol.linhas li>span{flex:0 0 26px; font-size:20px; line-height:1.1; text-align:center}
+  .bvLinhas{list-style:none; margin:12px 0 4px; padding:0; text-align:left}
+  .bvLinhas li{display:flex; gap:10px; align-items:center; padding:7px 4px; font-weight:700; font-size:15.5px; line-height:1.25;
+        border-top:1px dashed #0002}
+  .bvLinhas li>span{flex:0 0 28px; font-size:21px; text-align:center}
   .fechar{position:absolute; right:10px; top:10px; border:0; background:var(--brasa); color:#fff; width:32px; height:32px; border-radius:10px;
           font:800 16px sans-serif; cursor:pointer}
   .rua{height:46px; background:linear-gradient(#e9d3b0 0 10px,#6b5a52 10px); margin-top:-4px; position:relative}
@@ -322,7 +330,7 @@
   .entrarCx label{display:block; font-weight:800; font-size:14px; margin:8px 0 2px}
   .entrarCx input{width:100%; box-sizing:border-box; height:44px; border:3px solid var(--carvao); border-radius:12px; padding:0 12px;
         font:800 18px 'Baloo 2',sans-serif; background:#fff; color:var(--carvao)}
-  .entrarCx input#entSenha{letter-spacing:3px; text-transform:uppercase}
+  .entrarCx input#entSenha{letter-spacing:8px; text-align:center; font-size:24px}
   .entrarCx .dica{font-size:13px; font-weight:700; color:#8a5a3a; margin:8px 0 0}
   .entrarCx .erro{color:#c0281c; font-weight:800; font-size:14px; min-height:20px; margin:6px 0 0}
   .btGrande{width:100%; margin-top:10px; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); color:var(--carvao);
@@ -487,7 +495,7 @@
       <label for="entU">Seu @ do Instagram</label>
       <input id="entU" autocomplete="username" placeholder="@seu.nome" autocapitalize="none" spellcheck="false">
       <label for="entSenha">Senha do quarto</label>
-      <input id="entSenha" autocomplete="current-password" placeholder="XXXX-XXXX" autocapitalize="characters" spellcheck="false">
+      <input id="entSenha" autocomplete="current-password" placeholder="000000" inputmode="numeric" pattern="[0-9]*" maxlength="7" spellcheck="false">
       <p class="dica">📩 A senha chega na sua DM do Instagram quando você comenta AURA em um post do @comenteaura.</p>
       <p class="erro" id="entErro" role="alert"></p>
       <button class="btGrande" id="entOk">Entrar 🔥</button>
@@ -532,7 +540,7 @@
   <div class="caixa">
     <button class="fechar" id="fechar" aria-label="fechar">✕</button>
     <h2>📜 Regras do Edifício Aura</h2>
-    <ol id="listaRegras"></ol>
+    <ol id="listaRegras" class="linhas"></ol>
   </div>
 </div>
 
@@ -671,8 +679,12 @@ function mostrarNoPredio(nome){
   alvo.insertAdjacentHTML('beforeend','<div class="meu">MEU APÊ!</div>');
   if(!params.has('semrolar')) alvo.scrollIntoView({behavior:instantaneo?'auto':'smooth',block:'center'});
 }
+const EMOJI_REGRA=[[/^Comente AURA em/,'💬'],[/grátis/,'🎁'],[/aluguel é pago/,'💸'],[/a cada \d+ horas/,'⏱️'],[/personagem/,'🧍'],
+  [/gasta 1 dia/,'📅'],[/VENCENDO/,'⏳'],[/ATRASADO/,'⚠️'],[/Pracinha/,'🚚'],[/Ranking/,'🏆'],[/reajuste/,'📈'],[/apartamentos/,'🏢'],
+  [/móveis/,'🛋️'],[/região/,'🗺️'],[/bairros/,'🏘️']];
+function emojiRegra(r){ const e=EMOJI_REGRA.find(([re])=>re.test(r)); return e?e[1]:'🔥'; }
 function abrirRegras(e){ e&&e.preventDefault();
-  document.getElementById('listaRegras').innerHTML=(D.regras||[]).map(r=>`<li>${esc(r)}</li>`).join('');
+  document.getElementById('listaRegras').innerHTML=(D.regras||[]).map(r=>`<li><span>${emojiRegra(r)}</span><div>${esc(r)}</div></li>`).join('');
   document.getElementById('modal').hidden=false; }
 document.getElementById('abrirRegras').onclick=abrirRegras;
 document.getElementById('valor').onclick=abrirRegras;
@@ -946,8 +958,11 @@ function boasVindas(m){
   let visto=false; try{ visto=!!localStorage.getItem('aura_bv_'+m.u); localStorage.setItem('aura_bv_'+m.u,'1'); }catch(e){}
   if(visto) return;
   const faltam=Math.max(1,Math.ceil(gratis-dias));
-  document.getElementById('bvTexto').innerHTML=`<h2>🎉 Bem-vindo, @${esc(m.u)}!</h2><p>Você ganhou</p><div class="grande">${gratis} dias grátis</div>`
-    +`<p>Seu aluguel começa em <b>${faltam} dia${faltam>1?'s':''}</b>.</p><p>Cada AURA paga o aluguel, dá 🔥 Brasas e traz móveis pro seu apê.</p>`;
+  const lin=[['⏳',`Seu aluguel começa em <b>${faltam} dia${faltam>1?'s':''}</b>`],['💬',`Cada AURA paga <b>${esc(document.getElementById('valorAura').textContent)}</b> de aluguel`],
+    ['⏱️','Vale <b>1 AURA a cada 3 horas</b>'],['🔥','Cada AURA dá <b>10 Brasas</b>'],['🛋️','Com as Brasas você compra móveis pro seu apê']];
+  if(Casa.ligada) lin.push(['🔑','A senha do seu quarto chega na sua <b>DM</b>']);
+  document.getElementById('bvTexto').innerHTML=`<h2>🎉 Bem-vindo, @${esc(m.u)}!</h2><p>🎁 Você ganhou</p><div class="grande">${gratis} dias grátis</div>`
+    +`<ul class="bvLinhas">${lin.map(([e,t])=>`<li><span>${e}</span><div>${t}</div></li>`).join('')}</ul>`;
   document.getElementById('boasVindas').hidden=false;
 }
 document.getElementById('bvOk').onclick=()=>document.getElementById('boasVindas').hidden=true;
@@ -964,7 +979,7 @@ document.getElementById('vip').addEventListener('click',()=>{ const v=C().vip; i
 const PECAS=[['cama','🛏️ Cama'],['sofa','🛋️ Sofá'],['tapete','🟫 Tapete'],['planta','🪴 Planta'],['luminaria','💡 Luminária'],['cortina','🪟 Cortina'],['quadro','🖼️ Quadro']];
 const PRECO={1:30,2:80,3:200,4:450,5:900};
 const ERROS={NAO_MORA:'Esse @ ainda não mora no prédio. Comente AURA num post do @comenteaura!',SENHA_ERRADA:'Senha errada. Confira na sua DM do Instagram.',
-  BLOQUEADO:'Muitas tentativas erradas. Espere 15 minutos e tente de novo.',SEM_BRASAS:'Faltam Brasas. Comente AURA pra ganhar mais 🔥',
+  BLOQUEADO:'Muitas tentativas erradas. Este quarto ficou trancado por um tempo — tente de novo mais tarde.',SEM_BRASAS:'Faltam Brasas. Comente AURA pra ganhar mais 🔥',
   JA_TEM:'Você já tem essa peça.',NAO_TEM:'Você ainda não tem essa peça.',REDE:'Sem conexão agora. Tente de novo em instantes.'};
 const BANCO=window.AURA_BANCO||{};
 const Casa={
@@ -981,11 +996,11 @@ const Casa={
     if(!r.ok){ const c=Object.keys(ERROS).find(k=>(j.message||'').includes(k)); throw new Error(c||'REDE'); }
     return j;
   },
-  /* simulação: tudo fica só neste aparelho; senha de teste = TESTE-1234 */
+  /* simulação: tudo fica só neste aparelho; senha de teste = 123456 */
   sim(fn,{p_u,p_senha,p_peca,p_nivel}){
     const u=(p_u||'').trim().replace(/^@/,'').toLowerCase(), a=acharMorador(u);
     if(!a) throw new Error('NAO_MORA');
-    if((p_senha||'').replace(/\s/g,'').toUpperCase()!=='TESTE-1234') throw new Error('SENHA_ERRADA');
+    if((p_senha||'').replace(/\D/g,'')!=='123456') throw new Error('SENHA_ERRADA');
     let q={compras:{},uso:{},gasto:0}; try{ q=JSON.parse(localStorage.getItem('aura_sim_'+u))||q; }catch(e){}
     const pres={...(a.m.mv||{})}, ganhas=a.m.br||0, tem=(p,n)=>n<=(pres[p]||0)||(q.compras[p]||[]).includes(n);
     if(fn==='comprar'){ if(tem(p_peca,p_nivel)) throw new Error('JA_TEM'); if(ganhas-q.gasto<PRECO[p_nivel]) throw new Error('SEM_BRASAS');
@@ -1008,15 +1023,15 @@ async function pedirUso(u){
 }
 function abrirEntrar(u){
   document.getElementById('entU').value='@'+u; document.getElementById('entSenha').value=''; document.getElementById('entErro').textContent='';
-  document.getElementById('entSim').innerHTML=Casa.simulado?'<span class="simulacao">MODO TESTE · senha TESTE-1234 · nada é salvo no servidor</span>':'';
+  document.getElementById('entSim').innerHTML=Casa.simulado?'<span class="simulacao">MODO TESTE · senha 123456 · nada é salvo no servidor</span>':'';
   document.getElementById('entrar').hidden=false; setTimeout(()=>document.getElementById('entSenha').focus(),50);
 }
 document.getElementById('entrarFechar').onclick=()=>document.getElementById('entrar').hidden=true;
 document.getElementById('entSenha').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('entOk').click(); });
 document.getElementById('entOk').onclick=async()=>{
-  const u=document.getElementById('entU').value.trim().replace(/^@/,'').toLowerCase(), senha=document.getElementById('entSenha').value.replace(/\s/g,'').toUpperCase();
+  const u=document.getElementById('entU').value.trim().replace(/^@/,'').toLowerCase(), senha=document.getElementById('entSenha').value.replace(/\D/g,'');
   const er=document.getElementById('entErro');
-  if(!u){ er.textContent='Digite seu @.'; return; } if(senha.length<8){ er.textContent='Digite a senha que chegou na sua DM (ex.: K7PX-3MWA).'; return; }
+  if(!u){ er.textContent='Digite seu @.'; return; } if(senha.length!==6){ er.textContent='A senha tem 6 números. Ela chegou na sua DM do Instagram.'; return; }
   er.textContent='Conferindo…';
   try{ lojaEstado=await Casa.rpc('entrar',{p_u:u,p_senha:senha}); }
   catch(e){ er.textContent=ERROS[e.message]||ERROS.REDE; return; }
