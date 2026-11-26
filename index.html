@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edifício Aura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --amarelo:#FFC83D; --laranja:#FF7A1A; --brasa:#E8432B; --carvao:#3B1A0C; --creme:#FFF3D6;
+    --verde:#3fbf4a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:'Baloo 2','Segoe UI',Arial,sans-serif; color:var(--carvao);
+    background:linear-gradient(#ff9a3c 0%,#ffc46b 30%,#ffe3a3 60%,#fff0cc 100%);
+    min-height:100vh; display:flex; justify-content:center;
+  }
+  .app{width:540px; max-width:100%; position:relative; padding-bottom:84px; overflow:hidden}
+
+  /* topo */
+  .topo{position:sticky; top:0; z-index:50; padding:12px 14px 8px;
+        background:linear-gradient(#ff9a3c,#ff9a3cee 70%,#ff9a3c00)}
+  .barra{display:flex; align-items:center; gap:10px; background:var(--carvao); border-radius:20px;
+         padding:8px 14px; box-shadow:0 4px 0 #1f0c04, 0 8px 18px #0004; border:3px solid #ffb13d}
+  .barra img{width:40px}
+  .marca{flex:1; line-height:1}
+  .marca b{display:block; color:#fff; font-size:25px; font-weight:800; letter-spacing:.5px}
+  .marca small{color:var(--amarelo); font-size:14px; font-weight:700}
+  .relogio{text-align:right; line-height:1}
+  .relogio small{display:block; color:#ffd9a8; font-size:10.5px; font-weight:700; letter-spacing:.5px}
+  .relogio b{color:var(--amarelo); font-size:25px; font-weight:800; font-variant-numeric:tabular-nums}
+  .chips{display:flex; gap:8px; margin-top:9px}
+  .chip{flex:1; display:flex; align-items:center; justify-content:center; gap:7px; border-radius:16px;
+        padding:4px 10px; font-weight:800; font-size:19px; border:3px solid var(--carvao);
+        box-shadow:0 3px 0 var(--carvao)}
+  .chip img{height:28px}
+  .chip.am{background:var(--amarelo)} .chip.cr{background:var(--creme)}
+  .busca{display:flex; align-items:center; gap:8px; margin-top:9px; background:#fff; border-radius:18px;
+         padding:5px 5px 5px 12px; border:3px solid var(--carvao); box-shadow:0 3px 0 var(--carvao)}
+  .busca img{height:24px}
+  .busca input{flex:1; border:0; outline:0; font:700 17px 'Baloo 2',sans-serif; color:var(--carvao); background:none; min-width:0}
+  .busca button{border:0; border-radius:13px; background:var(--laranja); color:#fff; font:800 16px 'Baloo 2',sans-serif;
+                padding:5px 16px; box-shadow:inset 0 -3px 0 #c4520a; cursor:pointer}
+
+  /* céu */
+  .ceu{position:relative; height:150px}
+  .nuvem{position:absolute; background:#fff8; border-radius:40px}
+  .dirigivel{position:absolute; left:8px; top:8px; width:200px; animation:flutua 6s ease-in-out infinite}
+  .dirigivel img{width:100%; display:block}
+  .dirigivel span{position:absolute; left:28%; top:31%; width:52%; text-align:center; font-weight:800;
+                  font-size:13px; line-height:1.05; color:var(--brasa); transform:rotate(-1deg)}
+  @keyframes flutua{50%{transform:translate(10px,-6px)}}
+  .outdoor{position:absolute; right:30px; bottom:-34px; width:150px; z-index:3}
+  .outdoor img{width:100%; display:block; position:relative}
+  .outdoor .tela{position:absolute; left:12%; top:15%; width:76%; height:42%; background:var(--creme); border-radius:6px;
+                 display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; z-index:1}
+  .outdoor .tela small{font-size:8.5px; font-weight:800; color:var(--laranja)}
+  .outdoor .tela b{font-size:15px; font-weight:800}
+  .outdoor .tela i{font-style:normal; font-size:8px; color:#8a5a3a}
+
+  /* prédio */
+  .predio{position:relative; margin:0 auto; width:490px; left:12px}
+  .telhado{position:relative; z-index:2}
+  .telhado > img{width:100%; display:block}
+  .vip{position:absolute; left:42%; bottom:24%; width:15%}
+  .vip img{width:100%; display:block}
+  .vip .coroa{position:absolute; left:28%; width:44%; top:-14%; z-index:2; filter:drop-shadow(0 2px 2px #0005)}
+  .tag-vip{position:absolute; left:50%; bottom:100%; transform:translateX(-50%); white-space:nowrap; background:var(--carvao);
+           color:var(--amarelo); font-size:10px; font-weight:800; padding:1px 8px; border-radius:10px; border:2px solid var(--amarelo)}
+  .andar{position:relative}
+  .andar > img.fachada{width:100%; display:block}
+  .num{position:absolute; left:-36px; top:30%; width:30px; height:30px; border-radius:9px; background:var(--carvao);
+       color:var(--amarelo); font-weight:800; font-size:19px; display:flex; align-items:center; justify-content:center;
+       border:2px solid var(--amarelo)}
+  .apto{position:absolute; z-index:2}
+  .janela{position:relative; width:100%}
+  .janela > img.j{width:100%; display:block}
+  .janela.apagada .j, .janela.apagada .busto{filter:brightness(.55) saturate(.6)}
+  .busto{position:absolute; left:19%; width:62%; bottom:26%}
+  .frente{position:absolute; left:0; right:0; bottom:0; top:71.5%; background:url(img/janela.png) center bottom/100% auto no-repeat}
+  .vaga{position:absolute; left:14%; width:72%; top:22%; transform:rotate(-4deg)}
+  .nome{position:absolute; left:50%; transform:translateX(-50%); white-space:nowrap; background:var(--creme);
+        border:2px solid var(--carvao); border-radius:9px; font-size:9.5px; font-weight:800; padding:0 5px; line-height:1.35}
+  .linha{display:flex; align-items:center; gap:3px; margin:0 0 2px}
+  .tempo{font-size:8.5px; font-weight:800; line-height:1; color:var(--carvao)}
+  .tempo.ruim{color:var(--brasa)}
+  .aluguel{position:relative; flex:1; min-width:18px; height:6px; border-radius:4px; background:#00000030; overflow:hidden; border:1.5px solid var(--carvao)}
+  .aluguel i{display:block; height:100%}
+  .alerta{position:absolute; left:50%; top:-6px; transform:translateX(-50%); background:var(--brasa); color:#fff; font-size:9px;
+          font-weight:800; padding:0 6px; border-radius:8px; white-space:nowrap; border:2px solid #fff; z-index:5; animation:pisca 1s infinite}
+  @keyframes pisca{50%{opacity:.35}}
+  .balao{position:absolute; left:50%; top:-14px; transform:translateX(-50%); background:var(--verde); color:#fff; font-size:11px;
+         font-weight:800; padding:1px 9px; border-radius:10px; white-space:nowrap; border:2px solid #fff; z-index:5}
+  .apto.achado .janela{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 10px var(--amarelo))}
+  .apto.achado .nome{background:var(--amarelo)}
+  .meu{position:absolute; left:50%; top:-22px; transform:translateX(-50%); background:#fff; color:var(--laranja);
+       font-weight:800; font-size:12px; padding:0 10px; border-radius:12px; border:3px solid var(--laranja); z-index:6; white-space:nowrap}
+  .terreo{position:relative}
+  .terreo > img{width:100%; display:block}
+  .terreo span{position:absolute; left:37%; width:26%; top:9%; text-align:center; color:var(--amarelo); font-weight:800; font-size:13px}
+  .valor{display:block; width:100%; margin-top:8px; border:3px solid var(--carvao); border-radius:14px; background:var(--creme);
+         font:700 14px 'Baloo 2',sans-serif; color:var(--carvao); padding:3px 10px; cursor:pointer; text-align:center}
+  .valor b{color:var(--laranja)}
+  .praca{margin:0 14px 10px; background:linear-gradient(#8fd16a,#5fae45); border:3px solid var(--carvao); border-radius:20px; padding:10px 12px 12px;
+         box-shadow:0 4px 0 var(--carvao)}
+  .praca h2{margin:0; font-size:20px; color:#fff; text-shadow:0 2px 0 var(--carvao)}
+  .praca p{margin:0 0 6px; font-size:12.5px; font-weight:700; color:#1f3d12}
+  .banco{display:grid; grid-template-columns:repeat(6,1fr); gap:6px 4px; align-items:end}
+  .sentado{text-align:center; font-size:9px; font-weight:800; line-height:1.1}
+  .sentado img{width:100%; height:62px; object-fit:contain; display:block; filter:saturate(.75)}
+  .sentado span{display:block; background:var(--creme); border:2px solid var(--carvao); border-radius:8px; padding:0 2px;
+                overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .praca .mais{grid-column:1/-1; text-align:center; font-weight:800; font-size:13px; color:#fff}
+  .modal{position:fixed; inset:0; z-index:100; background:#000a; display:flex; align-items:center; justify-content:center; padding:16px}
+  .modal[hidden]{display:none}
+  .caixa{position:relative; width:100%; max-width:500px; max-height:85vh; overflow:auto; background:var(--creme); border:4px solid var(--carvao);
+         border-radius:22px; padding:16px 18px; box-shadow:0 6px 0 var(--carvao)}
+  .caixa h2{margin:0 30px 6px 0; font-size:22px}
+  .caixa ol{margin:0; padding-left:22px; font-size:15px; font-weight:600; line-height:1.35}
+  .caixa li{margin:6px 0}
+  .fechar{position:absolute; right:10px; top:10px; border:0; background:var(--brasa); color:#fff; width:32px; height:32px; border-radius:10px;
+          font:800 16px sans-serif; cursor:pointer}
+  .rua{height:46px; background:linear-gradient(#e9d3b0 0 10px,#6b5a52 10px); margin-top:-4px; position:relative}
+  .rua::after{content:""; position:absolute; left:0; right:0; top:27px; height:4px;
+              background:repeating-linear-gradient(90deg,var(--amarelo) 0 34px,transparent 34px 64px)}
+
+  /* menu */
+  .menu{position:fixed; bottom:10px; left:50%; transform:translateX(-50%); width:516px; max-width:calc(100% - 20px); z-index:60;
+        display:flex; background:var(--carvao); border-radius:22px; padding:6px; gap:4px; border:3px solid #ffb13d;
+        box-shadow:0 6px 18px #0005}
+  .menu a{flex:1; text-align:center; color:#ffe1b8; text-decoration:none; font-weight:800; font-size:14px; border-radius:16px;
+          padding:3px 0 2px; line-height:1.1}
+  .menu a img{height:24px; display:block; margin:0 auto 1px}
+  .menu a.on{background:var(--amarelo); color:var(--carvao)}
+  .chip button{border:0;background:var(--carvao);color:var(--amarelo);border-radius:9px;width:26px;height:26px;font:800 14px 'Baloo 2',sans-serif;cursor:pointer;padding:0}
+  .chip button:disabled{opacity:.25;cursor:default}
+  .aviso{margin-top:8px;background:var(--brasa);color:#fff;border-radius:14px;padding:3px 12px;font-weight:800;font-size:14px;
+         border:3px solid var(--carvao);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .aviso.ok{background:#3fbf4a}
+  .vazio{position:absolute;left:8%;right:8%;top:42%;z-index:8;background:var(--creme);border:3px solid var(--carvao);border-radius:18px;
+         padding:12px;text-align:center;font-weight:800;font-size:18px;box-shadow:0 4px 0 var(--carvao)}
+  .vazio small{display:block;font-size:13px;font-weight:700;color:#8a5a3a}
+
+  /* ===== Zoom 1: Cidade Aura ===== */
+  body.v-cidade .ceu, body.v-cidade .predio, body.v-cidade .rua, body.v-cidade .praca, body.v-cidade #ant, body.v-cidade #prox{display:none}
+  body:not(.v-cidade) .cidade{display:none}
+  .cidade{position:relative; margin:4px 10px 10px; border:4px solid var(--carvao); border-radius:24px; overflow:hidden;
+          box-shadow:0 5px 0 var(--carvao)}
+  .cidade > img.chao{width:100%; display:block}
+  .tit-cidade{position:absolute; left:4%; top:1.4%; z-index:30; text-align:left; line-height:1;
+              color:#fff; font-weight:800; font-size:24px; text-shadow:0 3px 0 var(--carvao), 0 0 10px #c4520a}
+  .tit-cidade small{display:block; font-size:12px; color:var(--creme)}
+  .bairro{position:absolute; z-index:25; transform:translate(-50%,-50%); background:var(--carvao); color:var(--amarelo);
+          font-size:11px; font-weight:800; padding:1px 9px; border-radius:10px; border:2px solid var(--amarelo); white-space:nowrap}
+  .pr{position:absolute; transform:translate(-50%,-85%); cursor:pointer; text-align:center; transition:transform .15s}
+  .pr:hover{transform:translate(-50%,-89%) scale(1.06)}
+  .pr img.ed{width:100%; display:block; filter:drop-shadow(0 4px 2px #0004)}
+  .pr .tag{position:absolute; left:50%; top:100%; transform:translateX(-50%); margin-top:-4px; background:var(--creme); border:2px solid var(--carvao);
+           border-radius:8px; font-size:9.5px; font-weight:800; line-height:1.25; padding:0 5px; white-space:nowrap}
+  .pr .tag i{font-style:normal; color:#8a5a3a}
+  .pr.cheio .tag i{color:var(--verde)}
+  .pr .fogo{position:absolute; left:50%; top:-10%; transform:translateX(-50%); font-size:15px; animation:sobe 1.6s ease-out infinite}
+  @keyframes sobe{0%{opacity:0; margin-top:8px}30%{opacity:1}100%{opacity:0; margin-top:-14px}}
+  .pr .atras{position:absolute; right:-6px; top:18%; background:var(--brasa); color:#fff; font-size:9px; font-weight:800; border-radius:8px;
+             padding:0 4px; border:2px solid #fff}
+  .pr .coroa-m{position:absolute; left:50%; top:-24%; width:46%; transform:translateX(-50%); animation:flutua 3s ease-in-out infinite}
+  .pr.meu-pr img.ed{filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 12px var(--amarelo))}
+  .pr.meu-pr .tag{background:var(--amarelo)}
+  .pr.obra{cursor:default; opacity:.95}
+  .pr.obra:hover{transform:translate(-50%,-85%)}
+  .fonte{position:absolute; z-index:24; transform:translate(-50%,-50%); text-align:center; cursor:pointer}
+  .fonte .gente{display:flex; justify-content:center; margin-bottom:-6px}
+  .fonte .gente img{height:34px; margin:0 -5px; filter:saturate(.75)}
+  .fonte b{display:inline-block; background:#5fae45; color:#fff; font-size:11px; font-weight:800; padding:1px 9px; border-radius:10px;
+           border:2px solid var(--carvao); white-space:nowrap}
+  .dirig-m{position:absolute; left:63%; top:1.5%; width:33%; z-index:29; animation:flutua 6s ease-in-out infinite}
+  .dirig-m img{width:100%; display:block}
+  .dirig-m span{position:absolute; left:28%; top:31%; width:52%; text-align:center; font-weight:800; font-size:9.5px; line-height:1.05; color:var(--brasa)}
+  .caminhao-m{position:absolute; z-index:26; width:17%; top:54.6%; animation:dirige 9s linear infinite}
+  .caminhao-m img{width:100%; display:block}
+  .caminhao-m span{position:absolute; left:50%; bottom:100%; transform:translateX(-50%); background:var(--brasa); color:#fff; font-size:9px;
+                   font-weight:800; padding:0 6px; border-radius:8px; white-space:nowrap; border:2px solid #fff}
+  @keyframes dirige{0%{left:-24%}45%,55%{left:14%}100%{left:14%}}
+  .mais-pr{position:absolute; z-index:27; transform:translate(-50%,-50%); background:var(--laranja); color:#fff; font-weight:800; font-size:12px;
+           border:2px solid var(--carvao); border-radius:12px; padding:1px 10px; cursor:pointer; white-space:nowrap}
+  .menu a{font-size:13px}
+
+  /* ===== bonecos "vivos" =====
+     Os pés ficam presos. É como puxar um ponto no alto da cabeça:
+     - sobe e desce devagar (respira), com a largura compensando um pouquinho;
+     - vai 2x para a direita e 2x para a esquerda num ciclo mais longo.
+     Os dois ciclos têm durações diferentes, então o movimento nunca se repete igual. */
+  .vivo{transform-origin:50% 100%; will-change:transform,scale;
+        animation:respira var(--dv,3.6s) ease-in-out var(--atraso,0s) infinite,
+                  balanca var(--dl,8s) ease-in-out var(--atraso2,0s) infinite}
+  @keyframes respira{0%,100%{scale:1 1} 50%{scale:.99 1.028}}
+  @keyframes balanca{
+    0%,25%,50%,75%,100%{transform:skewX(0deg)}
+    12.5%,37.5%{transform:skewX(-2.2deg)}   /* topo para a direita */
+    62.5%,87.5%{transform:skewX(2.2deg)}    /* topo para a esquerda */
+  }
+  @media (prefers-reduced-motion:reduce){.vivo{animation:none}}
+
+  /* ===== Zoom 0: Brasil Aura ===== */
+  body.v-brasil .ceu, body.v-brasil .predio, body.v-brasil .rua, body.v-brasil .praca, body.v-brasil #ant, body.v-brasil #prox,
+  body.v-brasil .cidade{display:none}
+  body:not(.v-brasil) .brasil{display:none}
+  .brasil{position:relative; margin:4px 10px 10px; border:4px solid var(--carvao); border-radius:24px; overflow:hidden; box-shadow:0 5px 0 var(--carvao)}
+  .brasil > img.chao{width:100%; display:block}
+  .reg{position:absolute; transform:translate(-50%,-72%); width:18.5%; cursor:pointer; text-align:center; transition:transform .15s}
+  .reg:hover{transform:translate(-50%,-78%) scale(1.05)}
+  .reg > img{width:100%; display:block; filter:drop-shadow(0 5px 3px #0005)}
+  .placa{position:absolute; z-index:200; pointer-events:none; transform:translate(-50%,0); white-space:nowrap; background:var(--carvao); color:var(--amarelo);
+              border:2px solid var(--amarelo); border-radius:11px; padding:0 9px; font-weight:800; font-size:12px; line-height:1.3; text-align:center}
+  .placa small{display:block; color:#ffe1b8; font-size:9.5px; font-weight:700}
+  .reg .chama{position:absolute; left:50%; bottom:80%; width:85%; transform:translateX(-50%); animation:flutua 3s ease-in-out infinite;
+              filter:drop-shadow(0 0 8px #ffb13d)}
+  .reg.minha > img{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px var(--amarelo))}
+  .capital{position:absolute; transform:translate(-50%,-50%); cursor:pointer; text-align:center; z-index:5}
+  .capital b{display:inline-block; background:var(--amarelo); color:var(--carvao); border:2px solid var(--carvao); border-radius:11px;
+             padding:0 9px; font-size:12px; font-weight:800; white-space:nowrap; box-shadow:0 2px 0 var(--carvao)}
+  .capital small{display:block; font-size:9.5px; font-weight:800; color:#fff; text-shadow:0 1px 2px #000}
+  .tit-brasil{position:absolute; left:0; right:0; top:2.2%; text-align:center; color:#fff; font-weight:800; font-size:28px; line-height:1;
+              text-shadow:0 3px 0 var(--carvao), 0 0 12px #c4520a; z-index:6}
+  .tit-brasil small{display:block; font-size:12.5px; color:var(--creme); margin-top:3px}
+  .campea{position:absolute; left:6%; right:6%; bottom:3%; z-index:6; background:var(--creme); border:3px solid var(--carvao); border-radius:16px;
+          box-shadow:0 3px 0 var(--carvao); padding:6px 10px; font-weight:800; font-size:13px}
+  .campea h3{margin:0 0 3px; font-size:15px}
+  .campea .lin{display:flex; align-items:center; gap:6px; margin:2px 0}
+  .campea .lin span{width:92px; white-space:nowrap}
+  .campea .lin i{flex:1; height:9px; border-radius:6px; background:#0002; overflow:hidden; border:1.5px solid var(--carvao)}
+  .campea .lin i b{display:block; height:100%; background:linear-gradient(90deg,var(--amarelo),var(--laranja))}
+  .campea .lin em{font-style:normal; width:46px; text-align:right; font-size:12px}
+  .voar{animation:voar .55s ease-out}
+  @keyframes voar{from{transform:scale(.55); opacity:.2}to{transform:scale(1); opacity:1}}
+  .menu a{font-size:12px}
+
+  /* ===== 3D falso (2.5D): câmera que anda e aproxima, chão que inclina, nuvens em camadas ===== */
+  .mapa25{perspective:900px; touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab}
+  .mapa25.arrastando{cursor:grabbing}
+  .mapa25 .incl{transform-origin:50% 100%; transform-style:preserve-3d; transform:rotateX(var(--tilt,0deg)); transition:transform .25s ease-out}
+  .mapa25 .palco{position:relative; transform-origin:0 0; transform-style:preserve-3d; will-change:transform}
+  .mapa25 .palco.suave{transition:transform .6s cubic-bezier(.3,.1,.2,1)}
+  .mapa25 .coisas{position:absolute; inset:0; transform-style:preserve-3d}
+  .mapa25 .chao{width:100%; display:block; pointer-events:none; -webkit-user-drag:none}
+  /* prédios e terrenos ficam "em pé" quando o chão inclina */
+  .mapa25 .pr, .mapa25 .reg, .mapa25 .fonte, .mapa25 .capital, .mapa25 .placa, .mapa25 .bairro{rotate:x calc(var(--tilt,0deg) * -1)}
+  .mapa25 .placa, .mapa25 .bairro, .mapa25 .capital, .mapa25 .pr .tag, .mapa25 .mais-pr{scale:var(--zl,1)}
+  .nuvens{position:absolute; inset:0; pointer-events:none; z-index:40; overflow:hidden}
+  .nuvens i{position:absolute; display:block; border-radius:50%; background:radial-gradient(closest-side,#fffffff0,#ffffffb0 60%,#fff0);
+            filter:blur(1px); animation:deriva linear infinite}
+  .nuvens i::before,.nuvens i::after{content:""; position:absolute; border-radius:50%; background:inherit}
+  .nuvens i::before{width:60%; height:120%; left:12%; top:-45%} .nuvens i::after{width:50%; height:100%; right:8%; top:-30%}
+  @keyframes deriva{from{translate:-30vw 0}to{translate:120vw 0}}
+  .zoomctl{position:absolute; right:10px; top:44%; z-index:45; display:flex; flex-direction:column; gap:6px}
+  .zoomctl button{width:38px; height:38px; border-radius:50%; border:3px solid var(--carvao); background:var(--creme); color:var(--carvao);
+                  font:800 22px 'Baloo 2',sans-serif; line-height:1; cursor:pointer; box-shadow:0 3px 0 var(--carvao)}
+  .tit-cidade,.tit-brasil,.dirig-m,#brasilPlacar{pointer-events:none} #brasilPlacar .campea{pointer-events:auto}
+  /* voo entre telas: nuvens passam na frente da tela inteira */
+  #nuvemVoo{position:fixed; inset:0; z-index:90; pointer-events:none; overflow:hidden; display:none}
+  #nuvemVoo.on{display:block}
+  #nuvemVoo i{position:absolute; border-radius:50%; background:radial-gradient(closest-side,#fff,#fffffff2 55%,#fff0); animation:passa .9s ease-in-out forwards}
+  @keyframes passa{0%{opacity:0; transform:translateY(40vh) scale(.6)}35%,60%{opacity:1}100%{opacity:0; transform:translateY(-60vh) scale(1.8)}}
+  .entra-perto{animation:entraPerto .55s ease-out} @keyframes entraPerto{from{transform:scale(1.7); opacity:0}to{transform:none; opacity:1}}
+  .entra-longe{animation:entraLonge .55s ease-out} @keyframes entraLonge{from{transform:scale(.6); opacity:0}to{transform:none; opacity:1}}
+  @media (prefers-reduced-motion:reduce){.nuvens i,#nuvemVoo i{animation:none; display:none} .entra-perto,.entra-longe{animation:none}}
+
+  /* ===== Zoom 3: Meu Apê ===== */
+  body.v-ape .ceu, body.v-ape .predio, body.v-ape .rua, body.v-ape .praca, body.v-ape .cidade, body.v-ape .brasil,
+  body.v-ape #ant, body.v-ape #prox{display:none}
+  body:not(.v-ape) .ape{display:none}
+  .quarto{position:relative; aspect-ratio:1120/1400; margin:4px 10px 8px; border:4px solid var(--carvao); border-radius:24px; overflow:hidden;
+          box-shadow:0 5px 0 var(--carvao); background:#f2a35a}
+  .quarto > img.fundo{position:absolute; inset:0; width:100%; height:100%; display:block}
+  .quarto .mv{position:absolute; transform:translate(-50%,-100%); filter:drop-shadow(0 6px 4px #0004)}
+  .quarto .mv.tapete{transform:translate(-50%,-50%); filter:none; z-index:1}
+  .quarto .mv.cama,.quarto .mv.sofa{z-index:2}
+  .quarto .mv.parede{transform:translate(-50%,0); filter:drop-shadow(0 4px 3px #0003); z-index:1}
+  .quarto .mv.canto{z-index:1}
+  .quarto .mv.sit{z-index:5}
+  .quarto .eu{position:absolute; left:50%; top:80%; height:38%; transform:translate(-50%,-100%); z-index:3; text-align:center}
+  .quarto .eu img{height:100%; display:block; filter:drop-shadow(0 8px 5px #0005)}
+  .quarto .placaNome{position:absolute; left:50%; top:41%; transform:translate(-50%,-100%); z-index:4; background:var(--carvao); color:var(--amarelo);
+          border:2px solid var(--amarelo); border-radius:12px; padding:0 12px; font-weight:800; font-size:15px; white-space:nowrap}
+  .quarto .vazioApe{position:absolute; left:50%; top:62%; transform:translateX(-50%); z-index:4; background:#fff9; border-radius:12px; padding:2px 10px;
+          font-weight:800; font-size:12px; white-space:nowrap}
+  .quarto.atrasado > img, .quarto.atrasado .eu img{filter:brightness(.55) saturate(.6)}
+  .quarto.atrasado .mv.tapete, .quarto.atrasado .mv.cama, .quarto.atrasado .mv.sofa, .quarto.atrasado .mv.parede, .quarto.atrasado .mv.canto{filter:brightness(.55) saturate(.6)}
+  .quarto .faixa{position:absolute; left:0; right:0; top:0; z-index:6; text-align:center; color:#fff; font-weight:800; font-size:14px; padding:4px 8px;
+          background:var(--brasa); border-bottom:3px solid var(--carvao)}
+  .quarto .faixa.laranja{background:var(--laranja)}
+  .ficha{margin:0 10px 12px; background:var(--creme); border:3px solid var(--carvao); border-radius:20px; box-shadow:0 4px 0 var(--carvao); padding:10px 12px}
+  .ficha h2{margin:0; font-size:24px; line-height:1.1}
+  .ficha .onde{font-weight:800; color:#8a5a3a; font-size:14px}
+  .ficha .aluga{display:flex; align-items:center; gap:8px; margin:6px 0; font-weight:800}
+  .ficha .aluga i{flex:1; height:12px; border-radius:8px; background:#0002; border:2px solid var(--carvao); overflow:hidden}
+  .ficha .aluga i b{display:block; height:100%}
+  .ficha .grade{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:6px 0}
+  .ficha .grade div{background:#fff; border:2px solid var(--carvao); border-radius:12px; text-align:center; padding:3px 2px; line-height:1.1}
+  .ficha .grade b{display:block; font-size:18px} .ficha .grade small{font-size:10.5px; font-weight:700; color:#8a5a3a}
+  .ficha .prox{font-weight:800; font-size:13px; margin:4px 0}
+  .ficha .prox i{display:block; height:8px; border-radius:6px; background:#0002; overflow:hidden; margin-top:2px}
+  .ficha .prox i b{display:block; height:100%; background:linear-gradient(90deg,var(--amarelo),var(--laranja))}
+  .ficha .botoes{display:flex; gap:8px; margin-top:8px}
+  .ficha .botoes button{flex:1; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); font:800 15px 'Baloo 2',sans-serif;
+          padding:4px; cursor:pointer; box-shadow:0 3px 0 var(--carvao); color:var(--carvao)}
+  .ficha .botoes button.claro{background:#fff}
+  .caixa.bv{text-align:center; animation:pula .5s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pula{from{transform:scale(.4); opacity:0}to{transform:none; opacity:1}}
+  .caixa.bv h2{margin:0 0 4px; font-size:26px} .caixa.bv p{margin:6px 0; font-weight:700; font-size:16px}
+  .caixa.bv .grande{font-size:44px; font-weight:800; color:var(--laranja); line-height:1}
+  .bvOk{margin-top:8px; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); font:800 18px 'Baloo 2',sans-serif;
+        padding:4px 26px; cursor:pointer; box-shadow:0 3px 0 var(--carvao)}
+
+  /* ===== Ranking ===== */
+  body.v-ranking .ceu, body.v-ranking .predio, body.v-ranking .rua, body.v-ranking .praca, body.v-ranking .cidade, body.v-ranking .brasil,
+  body.v-ranking #ant, body.v-ranking #prox{display:none}
+  body:not(.v-ranking) .rank{display:none}
+  .rank{margin:4px 10px 12px}
+  .rkTopo{background:var(--carvao); border:3px solid #ffb13d; border-radius:20px; padding:8px 10px 6px; color:#fff; text-align:center}
+  .rkTopo h2{margin:0; font-size:24px; color:var(--amarelo)}
+  .rkTopo small{display:block; color:#ffd9a8; font-weight:700; font-size:12px; margin-top:4px}
+  .rkTabs{display:flex; gap:6px; margin:4px 0 6px}
+  .rkTabs button,.rkReg button{flex:1; border:2px solid var(--amarelo); border-radius:12px; background:transparent; color:var(--amarelo);
+        font:800 14px 'Baloo 2',sans-serif; padding:1px 6px; cursor:pointer}
+  .rkTabs button.on,.rkReg button.on{background:var(--amarelo); color:var(--carvao)}
+  .rkReg{display:flex; gap:4px; flex-wrap:wrap}
+  .rkReg button{flex:0 0 auto; font-size:12px; padding:0 9px; border-radius:10px}
+  .podio{display:flex; align-items:flex-end; justify-content:center; gap:6px; margin:10px 0 10px; min-height:200px; border-bottom:4px solid var(--carvao)}
+  .podio .lugar{flex:1; max-width:150px; text-align:center; cursor:pointer}
+  .podio .lugar .boneco{position:relative; height:120px; display:flex; justify-content:center; align-items:flex-end}
+  .podio .lugar .boneco img.vivo{height:100%}
+  .podio .lugar .coroa{position:absolute; top:-20px; left:50%; width:38px; transform:translateX(-50%); animation:flutua 3s ease-in-out infinite; z-index:2}
+  .podio .lugar .nm{font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .podio .bloco{border:3px solid var(--carvao); border-bottom:0; border-radius:14px 14px 0 0; font-weight:800; color:var(--carvao); line-height:1;
+        padding-top:6px; box-shadow:inset 0 -6px 0 #0001}
+  .podio .bloco b{display:block; font-size:30px} .podio .bloco small{font-size:12px}
+  .podio .p1 .bloco{height:92px; background:linear-gradient(#ffe27a,var(--amarelo))}
+  .podio .p2 .bloco{height:68px; background:linear-gradient(#fff6e0,var(--creme))}
+  .podio .p3 .bloco{height:52px; background:linear-gradient(#ffb36b,var(--laranja))}
+  .rkEu{margin:0 0 8px; background:var(--verde); color:#fff; border:3px solid var(--carvao); border-radius:14px; padding:4px 10px; font-weight:800;
+        text-align:center; box-shadow:0 3px 0 var(--carvao)}
+  .rkEu.fora{background:var(--creme); color:var(--carvao)}
+  .rkLista{list-style:none; margin:0; padding:0; background:var(--creme); border:3px solid var(--carvao); border-radius:18px; overflow:hidden;
+        box-shadow:0 4px 0 var(--carvao)}
+  .rkLista li{display:flex; align-items:center; gap:8px; padding:4px 10px; border-bottom:2px dashed #3b1a0c22; cursor:pointer; font-weight:800}
+  .rkLista li:nth-child(odd){background:#fff8}
+  .rkLista li.sou{background:var(--amarelo)}
+  .rkLista .ps{width:30px; text-align:center; color:#8a5a3a}
+  .rkLista img{width:38px; height:38px; object-fit:cover; object-position:top; border-radius:50%; border:2px solid var(--carvao); background:#ffd9a8}
+  .rkLista .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .rkLista .tg{font-size:10px; background:var(--carvao); color:var(--amarelo); border-radius:8px; padding:0 6px; margin-left:4px}
+  .rkLista .n{color:var(--laranja); white-space:nowrap}
+
+  /* ===== Cartão pro story ===== */
+  .cartaoCx{text-align:center; max-width:420px}
+  .cartaoPrevia{margin:6px auto; width:min(64vw,260px); aspect-ratio:9/16; border-radius:16px; overflow:hidden; border:3px solid var(--carvao);
+        background:#ffd9a8; display:flex; align-items:center; justify-content:center; font-weight:800}
+  .cartaoPrevia img{width:100%; height:100%; display:block}
+  .cartaoBotoes{display:flex; gap:8px; margin-top:8px}
+  .cartaoBotoes button,.cartaoLink{flex:1; border:3px solid var(--carvao); border-radius:14px; background:var(--amarelo); font:800 15px 'Baloo 2',sans-serif;
+        padding:4px; cursor:pointer; box-shadow:0 3px 0 var(--carvao); color:var(--carvao)}
+  .cartaoBotoes button.claro,.cartaoLink{background:#fff}
+  .cartaoLink{display:block; width:100%; margin-top:8px}
+  .cartaoDica{display:block; margin-top:6px; color:#8a5a3a; font-weight:700}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topo">
+    <div class="barra">
+      <img src="img/ic_chama.png" alt="">
+      <div class="marca"><b>EDIFÍCIO AURA</b><small>@comenteaura</small></div>
+      <div class="relogio"><small id="relogioTitulo">PRÓXIMO DESPEJO EM</small><b id="relogio">--:--:--</b></div>
+    </div>
+    <div class="chips">
+      <div class="chip am"><img src="img/ic_grupo.png" alt=""><span id="nMoradores">0</span>&nbsp;moradores</div>
+      <div class="chip cr"><button id="ant" aria-label="bloco anterior">◀</button><img src="img/ic_predio.png" alt=""><span id="nBloco">Bloco 1 de 1</span><button id="prox" aria-label="próximo bloco">▶</button></div>
+    </div>
+    <form class="busca" id="busca">
+      <img src="img/ic_lupa.png" alt="">
+      <input id="q" placeholder="Onde fica meu apê?" autocomplete="off">
+      <button>Buscar</button>
+    </form>
+    <div class="aviso" id="aviso" hidden></div>
+    <button class="valor" id="valor" type="button">🔥 Este mês cada AURA paga <b id="valorAura">12h</b> · ver regras</button>
+  </header>
+
+  <section class="brasil mapa25" id="brasil">
+    <div class="incl"><div class="palco">
+      <img class="chao" src="img/brasil.jpg" alt="mapa do Brasil Aura">
+      <div id="brasilCoisas" class="coisas"></div>
+    </div></div>
+    <div class="nuvens"></div>
+    <div class="tit-brasil">BRASIL AURA<small>comente AURA + sua região (ex.: AURA NE)</small></div>
+    <div id="brasilPlacar"></div>
+    <div class="zoomctl"><button data-z="1" aria-label="aproximar">+</button><button data-z="-1" aria-label="afastar">−</button></div>
+  </section>
+
+  <section class="cidade mapa25" id="cidade">
+    <div class="incl"><div class="palco">
+      <img class="chao" src="img/mapa.png" alt="mapa da Cidade Aura">
+      <div id="mapaCoisas" class="coisas"></div>
+    </div></div>
+    <div class="nuvens"></div>
+    <div class="dirig-m"><img src="img/dirigivel.png" alt=""><span id="dirigNome">SUA MARCA<br>AQUI</span></div>
+    <div class="tit-cidade" id="titCidade">CIDADE AURA<small>toque num prédio para entrar</small></div>
+    <div class="zoomctl"><button data-z="1" aria-label="aproximar">+</button><button data-z="-1" aria-label="afastar">−</button></div>
+  </section>
+  <div id="nuvemVoo" aria-hidden="true"></div>
+
+  <section class="ape" id="ape">
+    <div class="quarto" id="quarto"></div>
+    <div class="ficha" id="fichaApe"></div>
+  </section>
+  <section class="rank" id="ranking">
+    <div class="rkTopo">
+      <h2>🏆 Ranking</h2>
+      <div class="rkTabs" id="rkPeriodo"><button data-p="mes" class="on">Do mês</button><button data-p="sem">Da semana</button></div>
+      <div class="rkReg" id="rkReg"></div>
+      <small id="rkObs"></small>
+    </div>
+    <div class="podio" id="rkPodio"></div>
+    <div class="rkEu" id="rkEu"></div>
+    <ol class="rkLista" id="rkLista"></ol>
+  </section>
+  <div class="modal" id="cartao" hidden>
+    <div class="caixa cartaoCx">
+      <button class="fechar" id="cartaoFechar" aria-label="fechar">✕</button>
+      <h2>📸 Seu cartão pro story</h2>
+      <div class="cartaoPrevia" id="cartaoPrevia"><span>Montando seu cartão…</span></div>
+      <div class="cartaoBotoes">
+        <button id="cartaoEnviar">📤 Compartilhar</button>
+        <button id="cartaoBaixar" class="claro">⬇️ Baixar imagem</button>
+      </div>
+      <button id="cartaoLink" class="cartaoLink">🔗 Copiar link do meu apê</button>
+      <small class="cartaoDica">No story, cole o link no adesivo "Link" para o pessoal ver seu apê.</small>
+    </div>
+  </div>
+  <div class="modal" id="boasVindas" hidden>
+    <div class="caixa bv"><div id="bvTexto"></div><button class="bvOk" id="bvOk">Bora! 🔥</button></div>
+  </div>
+
+  <div class="ceu">
+    <div class="nuvem" style="left:300px;top:20px;width:90px;height:26px"></div>
+    <div class="nuvem" style="left:230px;top:70px;width:60px;height:18px"></div>
+    <div class="dirigivel"><img src="img/dirigivel.png" alt=""><span>SUA MARCA<br>AQUI</span></div>
+    <div class="outdoor"><div class="tela"><small>OUTDOOR DO TOP 1</small><b id="outdoorNome">seu @ aqui</b><i>anuncie sua marca</i></div><img src="img/outdoor.png" alt=""></div>
+  </div>
+
+  <div class="predio" id="predio">
+    <div class="telhado">
+      <img src="img/telhado.png" alt="">
+      <div class="vip" id="vip"><div class="tag-vip" id="vipTag">👑 cobertura livre</div><img class="coroa" src="img/ic_coroa.png" alt=""><img id="vipCorpo" class="vivo" src="img/corpo1.png" alt=""></div>
+    </div>
+    <div id="andares"></div>
+    <div class="terreo"><img src="img/terreo.png" alt=""><span>EDIFÍCIO AURA</span></div>
+  </div>
+  <div class="rua"></div>
+  <section class="praca" id="praca">
+    <h2>🌳 PRACINHA</h2>
+    <p>Quem foi despejado espera aqui. Comentou AURA, volta pro prédio na hora!</p>
+    <div class="banco" id="banco"></div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="caixa">
+    <button class="fechar" id="fechar" aria-label="fechar">✕</button>
+    <h2>📜 Regras do Edifício Aura</h2>
+    <ol id="listaRegras"></ol>
+  </div>
+</div>
+
+<nav class="menu">
+  <a href="#" id="irBrasil"><img src="img/chama_simples.png" alt="">Brasil</a>
+  <a href="#" id="irCidade"><img src="img/ic_pino.png" alt="">Cidade</a>
+  <a href="#" id="irPredio"><img src="img/ic_predio.png" alt="">Prédio</a>
+  <a href="#" id="irRanking"><img src="img/ic_coroa.png" alt="">Ranking</a>
+  <a href="#" id="abrirRegras"><img src="img/ic_sino.png" alt="">Regras</a>
+  <a href="#" id="irApe"><img src="img/ic_casa.png" alt="">Meu Apê</a>
+</nav>
+
+<script src="dados.js"></script>
+<script>
+/* medidas da peça andar.png (2110 x 486) e dos buracos das janelas */
+const AW=2110, AH=486, HOLES=[141,539,935,1321,1721], HW=249, HY=136, HH=238;
+const ANDARES=7, POR_ANDAR=5;
+const params=new URLSearchParams(location.search);
+let D=window.DADOS||{blocos:[{numero:1,aptos:Array(35).fill(null)}],total_moradores:0,total_blocos:1,vip:null,saldo_maximo_horas:72,pagaram_ultima_hora:[],despejados_recentes:[],proximo_despejo:null};
+let blocoAtual=0;
+let cidadeAtual=(params.get('regiao')||'CAP').toUpperCase();
+const SIGLA={CAP:'Capital',N:'Norte',NE:'NE',CO:'CO',SE:'SE',S:'Sul'};
+/* cidade da região escolhida (cada região do Brasil Aura é uma cidade) */
+function C(){ const c=(D.cidades||{})[cidadeAtual];
+  if(c&&c.blocos&&c.blocos.length) return c;
+  return {nome:'Cidade Aura',blocos:D.blocos||[{numero:1,bairro:'Bairro Nobre',aptos:Array(35).fill(null)}],total_blocos:D.total_blocos||1,total_moradores:D.total_moradores||0,vip:D.vip}; }
+function nBlocos(){ return Math.max(1,C().blocos.length); }
+
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* horas que ainda faltam (descontando o tempo desde a última atualização; de madrugada o aluguel não corre) */
+function restante(m){
+  if(m.atrasado) return 0;
+  const passou=Math.max(0,(Date.now()-new Date(D.atualizado_em))/3600e3);
+  return Math.max(0,m.horas-passou);
+}
+function fmtTempo(m){
+  if(m.atrasado) return 'atrasado';
+  const h=restante(m);
+  if(h>=24) return `${Math.floor(h/24)}d ${Math.floor(h%24)}h`;
+  if(h>=1) return `${Math.floor(h)}h${String(Math.floor(h%1*60)).padStart(2,'0')}`;
+  return `${Math.max(1,Math.round(h*60))}min`;
+}
+function vivo(seed,extra=''){ let h=0; for(const c of String(seed)) h=(h*31+c.charCodeAt(0))|0; h=Math.abs(h);
+  return `class="vivo" style="--atraso:-${(h%3600)/1000}s;--atraso2:-${(h>>4)%8000/1000}s;--dv:${3.3+(h%7)/10}s;--dl:${7.4+(h>>3)%13/10}s;${extra}"`; }
+function corAluguel(h){ const f=h/D.saldo_maximo_horas; return f>=.3?'#3fbf4a':f>=.08?'#FFC83D':'#E8432B'; }
+
+function montar(){
+  const bloco=C().blocos[blocoAtual]||C().blocos[0];
+  const pagaram=new Set((D.pagaram_ultima_hora||[]).slice(-4)); // só alguns balões, para não poluir
+  let html='';
+  for(let a=ANDARES;a>=1;a--){
+    html+=`<div class="andar"><img class="fachada" src="img/andar.png" alt=""><div class="num">${a}</div>`;
+    for(let i=0;i<POR_ANDAR;i++){
+      const m=bloco.aptos[(ANDARES-a)*POR_ANDAR+i];
+      const left=(HOLES[i]-HW*.07)/AW*100, w=HW*1.14/AW*100, top=(HY-HH*.08)/AH*100;
+      html+=`<div class="apto" data-nome="${m?esc(m.u):''}" style="left:${left}%;width:${w}%;top:${top}%">`;
+      html+=`<div class="janela${m&&m.atrasado?' apagada':''}"><img class="j" src="img/janela.png" alt="">`;
+      if(m){
+        html+=`<div class="busto"><img ${vivo(m.u,'width:100%;display:block')} src="img/feliz${m.p}.png" alt=""></div><div class="frente"></div>`;
+        if(m.atrasado) html+=`<div class="alerta">ATRASADO!</div>`;
+        else if(m.alerta) html+=`<div class="alerta" style="background:#FF7A1A">VENCENDO!</div>`;
+        else if(pagaram.has(m.u)) html+=`<div class="balao">AURA! +${D.valor_aura||12}h 🔥</div>`;
+      } else html+=`<img class="vaga" src="img/placa_vaga.png" alt="vaga">`;
+      html+=`</div>`;
+      if(m){
+        const pct=Math.max(4,Math.min(100,m.horas/D.saldo_maximo_horas*100));
+        const h=restante(m);
+        html+=`<div class="nome" style="top:calc(100% - 3px)">@${esc(m.u)}<div class="linha"><div class="aluguel"><i style="width:${pct}%;background:${corAluguel(h)}"></i></div><span class="tempo${h<1?' ruim':''}">⏳${fmtTempo(m)}</span></div></div>`;
+      }
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  }
+  if(!C().total_moradores) html+=`<div class="vazio">Seja o primeiro morador${cidadeAtual==='CAP'?'':' do '+esc(C().nome)}!<small>Comente AURA${cidadeAtual==='CAP'?'':' '+(cidadeAtual==='S'?'SUL':cidadeAtual)} em qualquer post do @comenteaura</small></div>`;
+  document.getElementById('andares').innerHTML=html;
+  document.getElementById('andares').style.position='relative';
+  document.getElementById('nMoradores').textContent=(vista==='brasil'?D.total_moradores:C().total_moradores).toLocaleString('pt-BR');
+  document.getElementById('nBloco').textContent=vista==='brasil'?`${D.total_blocos} prédio${D.total_blocos===1?'':'s'}`:vista==='cidade'?`${C().total_blocos} prédio${C().total_blocos===1?'':'s'} · ${SIGLA[cidadeAtual]||''}`:`Bloco ${blocoAtual+1} · ${SIGLA[cidadeAtual]||''}`;
+  document.getElementById('ant').disabled=blocoAtual===0;
+  document.getElementById('prox').disabled=blocoAtual>=nBlocos()-1;
+  const vip=C().vip;
+  document.getElementById('vip').style.display=vip?'':'none';
+  document.getElementById('vipTag').textContent=vip?`👑 @${vip.u} · TOP 1 ${cidadeAtual==='CAP'?'da Capital':'do '+C().nome}`:'';
+  if(vip) document.getElementById('vipCorpo').src=`img/corpo${vip.p}.png`;
+  document.getElementById('outdoorNome').textContent=D.vip?'@'+D.vip.u:'seu @ aqui';
+  document.getElementById('valorAura').textContent=(D.valor_aura||12)+'h';
+  const pr=D.pracinha||[], banco=document.getElementById('banco');
+  document.getElementById('praca').hidden=!pr.length;
+  banco.innerHTML=pr.slice(0,12).map(x=>`<div class="sentado"><img ${vivo(x.u)} src="img/corpo${x.p}.png" alt=""><span>@${esc(x.u)}</span></div>`).join('')
+    +(D.total_pracinha>12?`<div class="mais">+${D.total_pracinha-12} esperando na Pracinha</div>`:'');
+  const av=document.getElementById('aviso'), d=(D.despejados_recentes||[])[0];
+  if(d){ av.hidden=false; av.className='aviso'; av.textContent=`🚚 @${d.u} foi despejado e está na Pracinha! Comenta AURA pra voltar`; } else av.hidden=true;
+}
+
+document.getElementById('ant').onclick=e=>{e.preventDefault(); if(blocoAtual>0){blocoAtual--; montar();}};
+document.getElementById('prox').onclick=e=>{e.preventDefault(); if(blocoAtual<nBlocos()-1){blocoAtual++; montar();}};
+
+/* relógio: tempo até o próximo despejo previsto */
+function tique(){
+  const el=document.getElementById('relogio');
+  if(!D.proximo_despejo){ el.textContent='--:--:--'; return; }
+  const s=Math.max(0,Math.floor((new Date(D.proximo_despejo)-Date.now())/1000));
+  el.textContent=[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':');
+}
+
+/* busca "Onde fica meu apê?" */
+let instantaneo=false;
+function mostrarNoPredio(nome){
+  nome=nome.trim().replace(/^@/,'').toLowerCase();
+  document.querySelectorAll('.apto.achado').forEach(a=>{a.classList.remove('achado'); a.querySelector('.meu')?.remove();});
+  if(!nome) return;
+  const av=document.getElementById('aviso');
+  let b=-1;
+  for(const [k,c] of Object.entries(D.cidades||{})){
+    if(c.vip&&c.vip.u===nome){ cidadeAtual=k; blocoAtual=0; ver('predio'); window.scrollTo(0,0);
+      av.hidden=false; av.className='aviso ok'; av.textContent=`👑 @${nome} mora na COBERTURA VIP ${k==='CAP'?'da Capital':'do '+c.nome} · aluguel pago por ${fmtTempo(c.vip)}`; return; }
+    const i=c.blocos.findIndex(bl=>bl.aptos.some(m=>m&&m.u===nome));
+    if(i>=0){ if(k!==cidadeAtual){ cidadeAtual=k; blocoAtual=-1; } b=i; break; }
+  }
+  if(b<0){
+    av.hidden=false; av.className='aviso';
+    av.textContent=(D.despejados_recentes||[]).some(d=>d.u===nome)
+      ? `🌳 @${nome} está na Pracinha! Comenta AURA pra voltar pro prédio`
+      : `@${nome} ainda não mora aqui. Comenta AURA em qualquer post!`;
+    return;
+  }
+  if(b!==blocoAtual||vista!=='predio'){ blocoAtual=b; ver('predio'); }
+  const alvo=[...document.querySelectorAll('.apto')].find(a=>a.dataset.nome===nome);
+  alvo.classList.add('achado');
+  const idx=C().blocos[b].aptos.findIndex(m=>m&&m.u===nome), m=C().blocos[b].aptos[idx];
+  av.hidden=false; av.className=m.atrasado||restante(m)<1?'aviso':'aviso ok';
+  av.textContent=m.atrasado
+    ? `⚠️ @${nome} está ATRASADO! Comenta AURA antes do caminhão chegar`
+    : `🏠 ${C().nome} · Bloco ${b+1}, ${ANDARES-Math.floor(idx/POR_ANDAR)}º andar · aluguel pago por mais ${fmtTempo(m)}`;
+  alvo.insertAdjacentHTML('beforeend','<div class="meu">MEU APÊ!</div>');
+  if(!params.has('semrolar')) alvo.scrollIntoView({behavior:instantaneo?'auto':'smooth',block:'center'});
+}
+function abrirRegras(e){ e&&e.preventDefault();
+  document.getElementById('listaRegras').innerHTML=(D.regras||[]).map(r=>`<li>${esc(r)}</li>`).join('');
+  document.getElementById('modal').hidden=false; }
+document.getElementById('abrirRegras').onclick=abrirRegras;
+document.getElementById('valor').onclick=abrirRegras;
+document.getElementById('fechar').onclick=()=>document.getElementById('modal').hidden=true;
+document.getElementById('modal').onclick=e=>{ if(e.target.id==='modal') e.target.hidden=true; };
+if(params.has('regras')) window.addEventListener('load',()=>abrirRegras());
+document.getElementById('busca').addEventListener('submit',e=>{e.preventDefault(); document.getElementById('q').blur(); buscar(document.getElementById('q').value);});
+
+/* atualiza sozinho: recarrega dados.js a cada 60 s */
+function recarregar(){
+  const s=document.createElement('script'); s.src='dados.js?t='+Date.now();
+  s.onload=()=>{ if(window.DADOS){ D=window.DADOS; blocoAtual=Math.min(blocoAtual,nBlocos()-1); montar(); if(vista==='cidade') montarCidade(); if(vista==='brasil') montarBrasil(); if(vista==='ranking') montarRanking(); if(vista==='ape'&&apeNome) abrirApe(apeNome,true); else { const q=document.getElementById('q').value; if(q&&vista==='predio') mostrarNoPredio(q);} } s.remove(); };
+  document.body.appendChild(s);
+}
+
+/* ===== Zoom 1: Cidade Aura =====
+   Terrenos do mapa.png (centro do terreno em % da imagem 941x1672) e quantos prédios cabem em cada um. */
+const LOTES={
+  'Bairro Nobre':[[50.5,16.4],[23.9,21],[76,20.6]],
+  'Centro':[[70.7,28.6],[34,29.6]],
+  'Vila':[[19.7,67.4],[79.2,67.4],[50,77.2],[19.7,83.2],[80.8,83.4]]
+};
+const SPRITE={'Bairro Nobre':['p_nobre',12.5],'Centro':['p_medio',10],'Vila':['p_vila',10]};
+const POR_LOTE={'Bairro Nobre':1,'Centro':2,'Vila':4};
+const ABRE={'Bairro Nobre':0,'Centro':9,'Vila':10}; /* afastamento entre prédios do mesmo terreno */
+const VAGAS_LOTE=[[0,0],[-1,1.2],[1,1.2],[0,4.6]];
+const FONTE=[50,53.4];
+let vista=params.get('ver')||'brasil';
+
+function vagasDoBairro(b){ const v=[]; for(let k=0;k<POR_LOTE[b];k++) for(const L of LOTES[b]){ if(b==='Vila'){ const P=[[-6.5,0],[6.5,0.8],[-6.5,4.6],[6.5,5.4]][k]; v.push([L[0]+P[0],L[1]+P[1]]); continue; }
+    const o=k===1?(L[0]<50?1:-1)*ABRE[b]:k===2?(L[0]<50?-1:1)*ABRE[b]:0; v.push([L[0]+o,L[1]+VAGAS_LOTE[k][1]]); } return v; }
+function montarCidade(){
+  const pagaram=new Set(D.pagaram_ultima_hora||[]);
+  const porBairro={}; C().blocos.forEach((bl,i)=>{ const b=bl.bairro||'Vila'; (porBairro[b]=porBairro[b]||[]).push(i); });
+  let h='', meuBloco=-1;
+  const nome=(document.getElementById('q').value||'').trim().replace(/^@/,'').toLowerCase();
+  if(nome) meuBloco=C().blocos.findIndex(bl=>bl.aptos.some(m=>m&&m.u===nome));
+  for(const b of Object.keys(LOTES)){
+    const lista=porBairro[b]||[], vagas=vagasDoBairro(b);
+    const c=LOTES[b][0];
+    if(lista.length) h+=`<div class="bairro" style="left:${{'Bairro Nobre':76,'Centro':50,'Vila':50}[b]}%;top:${{'Bairro Nobre':13,'Centro':33.2,'Vila':70.3}[b]}%">${b==='Bairro Nobre'?'✨ ':''}${b.toUpperCase()}</div>`;
+    const cabe=Math.min(lista.length,vagas.length-(b==='Vila'?1:0));
+    lista.slice(0,cabe).forEach((i,k)=>{
+      const bl=C().blocos[i], [x,y]=vagas[k], [img,w]=SPRITE[b];
+      const ocup=bl.aptos.filter(Boolean), atr=ocup.filter(m=>m.atrasado).length, fogo=ocup.some(m=>pagaram.has(m.u));
+      h+=`<div class="pr${ocup.length===bl.aptos.length?' cheio':''}${i===meuBloco?' meu-pr':''}" data-b="${i}" style="left:${x}%;top:${y}%;width:${w}%;z-index:${Math.round(y*10)}">`
+        +(i===0&&C().vip?`<img class="coroa-m" src="img/ic_coroa.png" alt="">`:'')
+        +`<img class="ed" src="img/${img}.png" alt="Bloco ${bl.numero}">`
+        +(fogo?`<span class="fogo">🔥</span>`:'')+(atr?`<span class="atras">⚠️${atr}</span>`:'')
+        +`<div class="tag">${i===meuBloco?'🏠 ':''}Bloco ${bl.numero} <i>${ocup.length}/${bl.aptos.length}</i></div></div>`;
+    });
+    if(lista.length>cabe){ const [x,y]=vagas[cabe]||vagas[vagas.length-1];
+      h+=`<div class="mais-pr" data-b="${lista[cabe]}" style="left:${x}%;top:${y}%">+${lista.length-cabe} prédios na ${b} ▶</div>`; }
+  }
+  /* terreno em obra: o próximo bloco que vai nascer */
+  const BL=C().blocos, ult=BL[BL.length-1], livres=ult.aptos.filter(m=>!m).length, prox=BL.length+1;
+  let bo='Vila'; for(const b of ['Bairro Nobre','Centro']){ const lim={'Bairro Nobre':2,'Centro':6}[b]; if(prox<=lim){bo=b;break;} }
+  const vo=vagasDoBairro(bo), n=(porBairro[bo]||[]).length;
+  if(C().total_moradores && n<vo.length){ let [x,y]=vo[n]; x=Math.max(14,Math.min(86,x));
+    h+=`<div class="pr obra" style="left:${x}%;top:${y}%;width:12%;z-index:${Math.round(y*10)}"><img class="ed" src="img/p_obra.png" alt="obra">`
+      +`<div class="tag">Bloco ${prox} em obra <i>faltam ${livres}</i></div></div>`; }
+  /* Pracinha na fonte */
+  const pr=D.pracinha||[];
+  h+=`<div class="fonte" id="fonteMapa" style="left:${FONTE[0]}%;top:${FONTE[1]+4.4}%">`
+    +`<div class="gente">${pr.slice(0,6).map(x=>`<img ${vivo(x.u)} src="img/corpo${x.p}.png" alt="">`).join('')}</div>`
+    +`<b>🌳 PRACINHA · ${D.total_pracinha||0}</b></div>`;
+  /* caminhão de mudança se alguém foi despejado nas últimas 24 h */
+  const d=pr[0];
+  if(d && Date.now()-new Date(d.quando)<24*3600e3)
+    h+=`<div class="caminhao-m"><span>🚚 @${esc(d.u)} indo pra Pracinha</span><img src="img/caminhao.png" alt=""></div>`;
+  document.getElementById('mapaCoisas').innerHTML=h;
+  document.getElementById('titCidade').innerHTML=`${esc(C().nome).toUpperCase()}<small>${C().total_moradores?'toque num prédio para entrar':'ninguém mora aqui ainda: comente AURA '+(cidadeAtual==='S'?'SUL':cidadeAtual==='CAP'?'':cidadeAtual)}</small>`;
+  document.getElementById('dirigNome').innerHTML=D.vip?`👑 TOP 1<br>@${esc(D.vip.u)}`:'SUA MARCA<br>AQUI';
+}
+document.getElementById('mapaCoisas').addEventListener('click',e=>{
+  const p=e.target.closest('[data-b]'); if(p){ voarPara('predio',()=>{ blocoAtual=+p.dataset.b; montar(); },p); return; }
+  if(e.target.closest('#fonteMapa')) voarPara('predio',()=>setTimeout(()=>document.getElementById('praca').scrollIntoView({behavior:'smooth'}),400),e.target.closest('#fonteMapa'));
+});
+function ver(v){
+  vista=v; document.body.classList.toggle('v-cidade',v==='cidade'); document.body.classList.toggle('v-brasil',v==='brasil'); document.body.classList.toggle('v-ape',v==='ape'); document.body.classList.toggle('v-ranking',v==='ranking');
+  document.getElementById('irRanking').classList.toggle('on',v==='ranking');
+  document.getElementById('irApe').classList.toggle('on',v==='ape');
+  document.getElementById('irBrasil').classList.toggle('on',v==='brasil');
+  document.getElementById('irCidade').classList.toggle('on',v==='cidade');
+  document.getElementById('irPredio').classList.toggle('on',v==='predio');
+  montar(); if(v==='cidade') montarCidade(); if(v==='brasil') montarBrasil(); if(v==='ranking') montarRanking();
+}
+document.getElementById('irCidade').onclick=e=>{e.preventDefault(); if(vista!=='cidade') voarPara('cidade');};
+document.getElementById('irPredio').onclick=e=>{e.preventDefault(); if(vista!=='predio') voarPara('predio');};
+
+/* ===== Zoom 0: Brasil Aura =====  terreno de cada região no brasil.jpg (941x1672), em % */
+const REGIOES={N:[40.4,38.9],NE:[73.6,42.4],CO:[52,53.1],SE:[69.3,61.7],S:[51.1,71.3]}; /* pontos marcados pelo GPT */
+const CAPITAL=[35.2,50.7];  /* Capital no terreno da esquerda, Centro-Oeste na praça do meio */
+function montarBrasil(){
+  const R=D.regioes||{}, camp=D.regiao_campea;
+  const nome=(document.getElementById('q').value||'').trim().replace(/^@/,'').toLowerCase();
+  const eu=nome&&(D.ranking||[]).concat(...Object.values(D.cidades||{}).flatMap(c=>c.blocos.map(b=>b.aptos))).find(m=>m&&m.u===nome);
+  let h='';
+  for(const [k,[x,y]] of Object.entries(REGIOES)){
+    const r=R[k]||{nome:k,moradores:0,nivel:1};
+    h+=`<div class="reg${eu&&eu.r===k?' minha':''}" data-reg="${k}" style="left:${x}%;top:${y}%;z-index:${Math.round(y)}">`
+      +(k===camp?`<img class="chama" src="img/chama_campea.png" alt="região campeã">`:'')
+      +`<img src="img/terreno_${Math.min(4,r.nivel)}.png" alt="">`
+      +`</div><div class="placa" style="left:${x}%;top:${y+3.2}%">${esc(r.nome)}<small>${r.moradores.toLocaleString('pt-BR')} morador${r.moradores===1?'':'es'}</small></div>`;
+  }
+  const cap=R.CAP||{moradores:0};
+  h+=`<div class="capital" data-reg="CAP" style="left:${CAPITAL[0]}%;top:${CAPITAL[1]}%"><b>🔥 Capital Aura</b><small>${cap.moradores} sem região</small></div>`;
+  const lista=Object.entries(R).filter(([k])=>k!=='CAP').sort((a,b)=>b[1].auras_mes-a[1].auras_mes);
+  const max=Math.max(1,...lista.map(([,r])=>r.auras_mes));
+  h+=`<div class="campea"><h3>🏆 Região campeã do mês: ${camp?esc(R[camp].nome):'—'}</h3>`
+    +lista.slice(0,5).map(([k,r],i)=>`<div class="lin"><span>${i+1}º ${esc(r.nome)}</span><i><b style="width:${r.auras_mes/max*100}%"></b></i><em>${r.auras_mes.toLocaleString('pt-BR')}</em></div>`).join('')
+    +`</div>`;
+  const pi=h.indexOf('<div class="campea">');
+  document.getElementById('brasilCoisas').innerHTML=h.slice(0,pi);
+  document.getElementById('brasilPlacar').innerHTML=h.slice(pi);
+}
+document.getElementById('brasilCoisas').addEventListener('click',e=>{
+  const r=e.target.closest('[data-reg]'); if(!r) return;
+  voarPara('cidade',()=>{ cidadeAtual=r.dataset.reg; blocoAtual=0; montar(); montarCidade(); },r);
+});
+document.getElementById('irBrasil').onclick=e=>{e.preventDefault(); if(vista!=='brasil') voarPara('brasil');};
+
+/* ===== 3D falso (2.5D) =====
+   Cada mapa tem uma "câmera": arrastar anda pros lados, pinça/roda/+− aproxima.
+   Quanto mais perto, mais o chão inclina (prédios continuam em pé) e as nuvens passam mais rápido. */
+const CAM={};
+function cam(id){
+  if(CAM[id]) return CAM[id];
+  const sec=document.getElementById(id), palco=sec.querySelector('.palco'), incl=sec.querySelector('.incl'), nv=sec.querySelector('.nuvens');
+  const c={sec,palco,incl,nv,x:0,y:0,z:1,movido:false};
+  /* nuvens desta camada (posições fixas, velocidades diferentes) */
+  nv.innerHTML=[[8,40,26,22],[30,62,30,30],[55,18,22,18],[72,78,34,34],[18,88,24,26]].map(([t,dl,w,d],i)=>
+    `<i style="top:${t}%;width:${w}%;height:${w*.28}vw;max-height:60px;animation-duration:${d}s;animation-delay:-${dl/3}s;opacity:${.55+.1*(i%3)}"></i>`).join('');
+  c.aplicar=(suave)=>{
+    const W=sec.clientWidth, H=palco.offsetHeight;
+    c.z=Math.min(3,Math.max(1,c.z));
+    c.x=Math.min(0,Math.max(W-W*c.z,c.x)); c.y=Math.min(0,Math.max(H-H*c.z,c.y));
+    palco.classList.toggle('suave',!!suave);
+    palco.style.transform=`translate(${c.x}px,${c.y}px) scale(${c.z})`;
+    sec.style.setProperty('--tilt',((c.z-1)/2*14).toFixed(2)+'deg');    /* até 14° de inclinação */
+    sec.style.setProperty('--zl',(1/Math.sqrt(c.z)).toFixed(3));        /* placas crescem menos que o mapa */
+    nv.style.transform=`translate(${c.x*0.35}px,${c.y*0.35}px) scale(${1+(c.z-1)*.6})`;  /* nuvens = camada mais perto */
+    sec.style.touchAction=c.z>1.01?'none':'pan-y';  /* sem zoom, o dedo ainda rola a página */
+  };
+  c.zoomEm=(px,py,nz,suave)=>{ nz=Math.min(3,Math.max(1,nz)); c.x=px-(px-c.x)*nz/c.z; c.y=py-(py-c.y)*nz/c.z; c.z=nz; c.aplicar(suave); };
+  c.reset=()=>{ c.x=0; c.y=0; c.z=1; c.aplicar(false); };
+  /* arrastar e pinça */
+  const ptr=new Map(); let ini=null;
+  sec.addEventListener('pointerdown',e=>{ if(e.target.closest('.zoomctl,.campea')) return; ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    c.movido=false; ini={x:c.x,y:c.y,z:c.z,pts:[...ptr.values()].map(p=>({...p}))}; });
+  sec.addEventListener('pointermove',e=>{
+    if(!ptr.has(e.pointerId)||!ini) return; ptr.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const r=sec.getBoundingClientRect(), P=[...ptr.values()];
+    if(P.length===1&&ini.pts.length===1){ const dx=P[0].x-ini.pts[0].x, dy=P[0].y-ini.pts[0].y;
+      if(Math.abs(dx)+Math.abs(dy)>6){ c.movido=true; sec.classList.add('arrastando'); sec.setPointerCapture(e.pointerId); }
+      if(c.movido){ c.x=ini.x+dx; c.y=ini.y+dy; c.aplicar(false); } }
+    else if(P.length>=2&&ini.pts.length>=2){ c.movido=true;
+      const d0=Math.hypot(ini.pts[0].x-ini.pts[1].x,ini.pts[0].y-ini.pts[1].y), d1=Math.hypot(P[0].x-P[1].x,P[0].y-P[1].y);
+      const mx=(P[0].x+P[1].x)/2-r.left, my=(P[0].y+P[1].y)/2-r.top;
+      c.x=ini.x; c.y=ini.y; c.z=ini.z; c.zoomEm(mx,my,ini.z*d1/d0,false); }
+  });
+  const fim=e=>{ ptr.delete(e.pointerId); sec.classList.remove('arrastando');
+    ini=ptr.size?{x:c.x,y:c.y,z:c.z,pts:[...ptr.values()].map(p=>({...p}))}:null; };
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>sec.addEventListener(ev,fim));
+  /* clique depois de arrastar não abre prédio */
+  sec.addEventListener('click',e=>{ if(c.movido){ e.stopPropagation(); e.preventDefault(); c.movido=false; } },true);
+  sec.addEventListener('wheel',e=>{ e.preventDefault(); const r=sec.getBoundingClientRect();
+    c.zoomEm(e.clientX-r.left,e.clientY-r.top,c.z*(e.deltaY<0?1.15:1/1.15),false); },{passive:false});
+  sec.querySelector('.zoomctl').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+    c.zoomEm(sec.clientWidth/2,sec.clientHeight/2,c.z*(+b.dataset.z>0?1.5:1/1.5),true); });
+  return CAM[id]=c;
+}
+
+/* voo: aproxima a câmera até o ponto tocado, nuvens passam na frente, e a próxima tela "chega" */
+const reduzMov=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let voando=false;
+function nuvensDeVoo(){
+  const n=document.getElementById('nuvemVoo');
+  n.innerHTML=Array.from({length:9},(_,i)=>`<i style="left:${(i*37)%100-15}%;top:${30+(i*23)%60}%;width:${45+(i*13)%30}vw;height:${22+(i*7)%14}vw;animation-delay:${(i%4)*.06}s"></i>`).join('');
+  n.classList.remove('on'); void n.offsetWidth; n.classList.add('on'); setTimeout(()=>n.classList.remove('on'),1000);
+}
+function voarPara(destino,depois,alvo){        /* alvo = elemento tocado (de onde a câmera "mergulha") */
+  if(voando) return; const de=vista;
+  const perto={brasil:0,cidade:1,predio:2,ape:3}, entrando=perto[destino]>perto[de];
+  if(reduzMov){ ver(destino); depois&&depois(); return; }
+  voando=true;
+  const secId={brasil:'brasil',cidade:'cidade'}[de];
+  if(entrando&&secId&&alvo){ const c=cam(secId), r=c.sec.getBoundingClientRect(), a=alvo.getBoundingClientRect();
+    c.zoomEm(a.left+a.width/2-r.left,a.top+a.height/2-r.top,3,true); }
+  else if(!entrando&&secId){ cam(secId).reset(); }
+  const PR=document.getElementById('predio');
+  if(de==='predio'&&entrando&&alvo){ const r=PR.getBoundingClientRect(), a=alvo.getBoundingClientRect();
+    PR.style.transformOrigin=`${a.left+a.width/2-r.left}px ${a.top+a.height/2-r.top}px`; PR.style.transition='transform .5s ease-in'; PR.style.transform='scale(3.2)'; }
+  nuvensDeVoo();
+  setTimeout(()=>{
+    PR.style.transition=''; PR.style.transform=''; ver(destino); depois&&depois(); window.scrollTo(0,0);
+    if(CAM.brasil&&destino==='brasil') CAM.brasil.reset();
+    if(CAM.cidade&&destino==='cidade') CAM.cidade.reset();
+    const el=document.getElementById(destino==='predio'?'predio':destino);
+    el.classList.remove('entra-perto','entra-longe'); void el.offsetWidth; el.classList.add(entrando?'entra-longe':'entra-perto');
+    voando=false;
+  },entrando?520:380);
+}
+
+/* ===== Zoom 3: Meu Apê ===== */
+const QUARTO={'Vila':'vila','Centro':'centro','Bairro Nobre':'nobre'};
+const NOME_MOVEL={cama:'uma cama',tapete:'um tapete',sofa:'um sofá',planta:'uma planta',luminaria:'uma luminária',cortina:'uma cortina',quadro:'um quadro'};
+let apeNome='';
+function acharMorador(nome){
+  for(const [k,c] of Object.entries(D.cidades||{})){
+    if(c.vip&&c.vip.u===nome) return {k,c,m:c.vip,vip:true};
+    for(let b=0;b<c.blocos.length;b++){ const i=c.blocos[b].aptos.findIndex(m=>m&&m.u===nome);
+      if(i>=0) return {k,c,b,i,m:c.blocos[b].aptos[i],bloco:c.blocos[b]}; }
+  }
+  return null;
+}
+function buscar(nome){
+  nome=(nome||'').trim().replace(/^@/,'').toLowerCase(); if(!nome) return;
+  const a=acharMorador(nome);
+  if(!a){ if(vista!=='predio') ver('predio'); mostrarNoPredio(nome); return; }
+  cidadeAtual=a.k; blocoAtual=a.vip?0:a.b;
+  if(vista==='ape') abrirApe(nome); else voarPara('ape',()=>abrirApe(nome));
+}
+function abrirApe(nome,silencioso){
+  const a=acharMorador(nome); if(!a) return;
+  apeNome=nome; const m=a.m, mv=m.mv||{}, h=restante(m);
+  const tipo=a.vip?'cobertura_vip':QUARTO[a.bloco.bairro]||'vila';
+  const andar=a.vip?null:ANDARES-Math.floor(a.i/POR_ANDAR);
+  let q=`<img class="fundo" src="img/q_${tipo}.jpg" alt="apê de @${esc(m.u)}">`;
+  if(mv.tapete) q+=`<img class="mv tapete" src="img/m_tapete${mv.tapete}.png" alt="" style="left:50%;top:90%;width:44%">`;
+  if(mv.cama)   q+=`<img class="mv cama" src="img/m_cama${mv.cama}.png" alt="" style="left:21.4%;top:76%;width:34%">`;
+  if(mv.sofa)   q+=`<img class="mv sofa" src="img/m_sofa${mv.sofa}.png" alt="" style="left:78.6%;top:76%;width:33%">`;
+  const vidro=tipo==='cobertura_vip';   /* na cobertura a parede do fundo é de vidro: sem cortina e sem quadro */
+  if(mv.cortina&&!vidro) q+=`<img class="mv parede" src="img/m_cortina${mv.cortina}.png" alt="" style="left:50%;top:8.5%;width:63%">`;
+  if(mv.quadro&&!vidro)  q+=`<img class="mv parede" src="img/m_quadro${mv.quadro}.png" alt="" style="left:13.5%;top:21%;width:19%">`;
+  if(mv.planta)    q+=`<img class="mv canto" src="img/m_planta${mv.planta}.png" alt="" style="left:8%;top:62%;width:17%">`;
+  if(mv.luminaria) q+=`<img class="mv canto" src="img/m_luminaria${mv.luminaria}.png" alt="" style="left:91.5%;top:63%;width:13%">`;
+  if(m.atrasado) q+=`<img class="mv sit" src="img/s_caixas.png" alt="caixas de mudança" style="left:84%;top:97%;width:24%"><img class="mv sit" src="img/s_caixa_aberta.png" alt="" style="left:16%;top:97%;width:24%">`;
+  else if(m.alerta) q+=`<img class="mv parede" src="img/s_relogio.png" alt="relógio" style="left:87%;top:20%;width:10%"><img class="mv parede" src="img/s_bilhete.png" alt="bilhete" style="left:87%;top:36%;width:7%;rotate:6deg">`;
+  q+=`<div class="eu"><img ${vivo(m.u)} src="img/corpo${m.p}.png" alt="personagem de @${esc(m.u)}"></div>`;
+  q+=`<div class="placaNome">@${esc(m.u)}</div>`;
+  if(!Object.values(mv).some(Boolean)) q+=`<div class="vazioApe">apê vazio · comente AURA pra ganhar móveis</div>`;
+  if(m.atrasado) q+=`<div class="faixa">⚠️ ATRASADO · comente AURA antes do caminhão chegar!</div>`;
+  else if(m.alerta) q+=`<div class="faixa laranja">⏳ VENCENDO · falta ${fmtTempo(m)} de aluguel</div>`;
+  const Q=document.getElementById('quarto'); Q.innerHTML=q; Q.classList.toggle('atrasado',!!m.atrasado);
+  const pos=(D.ranking||[]).findIndex(x=>x.u===m.u);
+  const pct=Math.max(3,Math.min(100,m.horas/D.saldo_maximo_horas*100));
+  const desde=m.desde?m.desde.split('-').reverse().slice(0,2).join('/'):'—';
+  let prox='';
+  if(m.prox){ const [peca,niv,falta]=m.prox, marco=(m.tot||0)+falta;
+    prox=`<div class="prox">🛋️ Faltam <b>${falta}</b> AURA${falta>1?'s':''} pra chegar ${NOME_MOVEL[peca]||peca}${niv>1?' melhor':''}<i><b style="width:${Math.min(100,(m.tot||0)/marco*100)}%"></b></i></div>`; }
+  document.getElementById('fichaApe').innerHTML=
+    `<h2>@${esc(m.u)}</h2>`
+    +`<div class="onde">📍 ${a.k==='CAP'?'Capital Aura':esc(a.c.nome)} · ${a.vip?'👑 Cobertura VIP':`Bloco ${a.b+1} · ${andar}º andar · ${esc(a.bloco.bairro)}`}</div>`
+    +`<div class="aluga">⏳<i><b style="width:${pct}%;background:${corAluguel(h)}"></b></i>${m.atrasado?'atrasado':fmtTempo(m)}</div>`
+    +`<div class="grade"><div><b>${m.auras}</b><small>AURAs no mês</small></div><div><b>${(m.br||0).toLocaleString('pt-BR')}</b><small>🔥 Brasas</small></div>`
+    +`<div><b>${pos>=0?pos+1+'º':'—'}</b><small>no ranking</small></div><div><b>${desde}</b><small>mora desde</small></div></div>`
+    +prox
+    +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`;
+  document.getElementById('apeVerPredio').onclick=()=>voarPara('predio',()=>{ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; montar(); setTimeout(()=>mostrarNoPredio(m.u),50); });
+  document.getElementById('apeCompartilhar').onclick=()=>abrirCartao(a,pos);
+  if(!silencioso) boasVindas(m);
+}
+/* boas-vindas: só na 1ª vez que a pessoa abre o próprio apê neste aparelho, enquanto ainda está nos dias grátis */
+function boasVindas(m){
+  const dias=(Date.now()-new Date(m.desde+'T12:00:00'))/864e5, gratis=Math.round((D.regras_dias_gratis||10));
+  if(!(dias<gratis)) return;
+  let visto=false; try{ visto=!!localStorage.getItem('aura_bv_'+m.u); localStorage.setItem('aura_bv_'+m.u,'1'); }catch(e){}
+  if(visto) return;
+  const faltam=Math.max(1,Math.ceil(gratis-dias));
+  document.getElementById('bvTexto').innerHTML=`<h2>🎉 Bem-vindo, @${esc(m.u)}!</h2><p>Você ganhou</p><div class="grande">${gratis} dias grátis</div>`
+    +`<p>Seu aluguel começa em <b>${faltam} dia${faltam>1?'s':''}</b>.</p><p>Cada AURA paga o aluguel, dá 🔥 Brasas e traz móveis pro seu apê.</p>`;
+  document.getElementById('boasVindas').hidden=false;
+}
+document.getElementById('bvOk').onclick=()=>document.getElementById('boasVindas').hidden=true;
+document.getElementById('irApe').onclick=e=>{ e.preventDefault();
+  const n=apeNome||(document.getElementById('q').value||'').trim().replace(/^@/,'').toLowerCase();
+  if(n&&acharMorador(n)) buscar(n); else { const i=document.getElementById('q'); i.focus(); i.placeholder='Digite seu @ pra ver seu apê'; } };
+/* tocar numa janela (ou na cobertura) abre o apê daquela pessoa */
+document.getElementById('andares').addEventListener('click',e=>{ const ap=e.target.closest('.apto'); if(!ap||!ap.dataset.nome) return;
+  const n=ap.dataset.nome; voarPara('ape',()=>abrirApe(n),ap); });
+document.getElementById('vip').addEventListener('click',()=>{ const v=C().vip; if(v) voarPara('ape',()=>abrirApe(v.u),document.getElementById('vip')); });
+
+/* ===== Ranking ===== */
+let rkPeriodo='mes', rkRegiao='BR';
+const RK_REG=[['BR','Brasil'],['CAP','Capital'],['N','Norte'],['NE','Nordeste'],['CO','C.-Oeste'],['SE','Sudeste'],['S','Sul']];
+function listaRanking(){
+  if(rkPeriodo==='sem'){ const l=D.ranking_semana||[]; return rkRegiao==='BR'?l:l.filter(x=>(x.r||'CAP')===rkRegiao); }
+  if(rkRegiao==='BR') return D.ranking||[];
+  const c=(D.cidades||{})[rkRegiao]; if(!c) return [];
+  return [c.vip,...c.blocos.flatMap(b=>b.aptos)].filter(Boolean).map(m=>({u:m.u,p:m.p,r:m.r,n:m.auras}));
+}
+function montarRanking(){
+  document.getElementById('rkReg').innerHTML=RK_REG.map(([k,n])=>`<button data-r="${k}" class="${k===rkRegiao?'on':''}">${n}</button>`).join('');
+  document.querySelectorAll('#rkPeriodo button').forEach(b=>b.classList.toggle('on',b.dataset.p===rkPeriodo));
+  document.getElementById('rkObs').textContent=rkPeriodo==='mes'?'AURAs feitos neste mês · recomeça todo dia 1':'AURAs feitos nos últimos 7 dias';
+  const L=listaRanking(), nome=(apeNome||document.getElementById('q').value||'').trim().replace(/^@/,'').toLowerCase();
+  const lug=(x,i)=>x?`<div class="lugar p${i+1}" data-u="${esc(x.u)}"><div class="boneco">${i===0?'<img class="coroa" src="img/ic_coroa.png" alt="">':''}<img ${vivo(x.u)} src="img/corpo${x.p}.png" alt=""></div>`
+      +`<div class="nm">@${esc(x.u)}</div><div class="bloco"><b>${i+1}º</b><small>${x.n} AURAs</small></div></div>`:'<div class="lugar"></div>';
+  document.getElementById('rkPodio').innerHTML=L.length?lug(L[1],1)+lug(L[0],0)+lug(L[2],2):'<p style="font-weight:800;text-align:center">Ninguém aqui ainda. Comente AURA e seja o 1º!</p>';
+  const SG={CAP:'Capital',N:'Norte',NE:'Nordeste',CO:'C.-Oeste',SE:'Sudeste',S:'Sul'};
+  document.getElementById('rkLista').innerHTML=L.slice(3,50).map((x,i)=>`<li data-u="${esc(x.u)}" class="${x.u===nome?'sou':''}"><span class="ps">${i+4}º</span>`
+      +`<img src="img/feliz${x.p}.png" alt=""><span class="nm">@${esc(x.u)}${rkRegiao==='BR'?`<span class="tg">${SG[x.r||'CAP']}</span>`:''}</span><span class="n">${x.n} 🔥</span></li>`).join('');
+  const eu=document.getElementById('rkEu'), pos=nome?L.findIndex(x=>x.u===nome):-1;
+  eu.hidden=false;
+  if(pos>=0){ eu.className='rkEu'; eu.textContent=`⭐ @${nome}, você está em ${pos+1}º ${rkRegiao==='BR'?'no Brasil':'na região'} com ${L[pos].n} AURAs`; }
+  else if(nome&&acharMorador(nome)){ eu.className='rkEu fora'; eu.textContent=`@${nome}, você ainda não aparece aqui. Comente AURA pra subir!`; }
+  else { eu.className='rkEu fora'; eu.textContent='Digite seu @ na busca lá em cima pra ver sua posição'; }
+}
+document.getElementById('rkPeriodo').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ rkPeriodo=b.dataset.p; montarRanking(); } });
+document.getElementById('rkReg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ rkRegiao=b.dataset.r; montarRanking(); } });
+document.getElementById('ranking').addEventListener('click',e=>{ const x=e.target.closest('[data-u]'); if(x) buscar(x.dataset.u); });
+document.getElementById('irRanking').onclick=e=>{ e.preventDefault(); if(vista==='ranking') return; ver('ranking'); window.scrollTo(0,0);
+  const el=document.getElementById('ranking'); el.classList.remove('entra-perto'); void el.offsetWidth; el.classList.add('entra-perto'); };
+
+/* ===== Cartão pro story (imagem 1080x1920 feita no próprio celular) ===== */
+let cartaoBlob=null, cartaoNome='';
+const carregaImg=src=>new Promise((ok,erro)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=erro; i.src=src; });
+function caixaArred(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function pilula(ctx,txt,cx,y,fonte,fundo,cor,borda,padX,altura){
+  ctx.font=fonte; const w=ctx.measureText(txt).width+padX*2;
+  caixaArred(ctx,cx-w/2,y,w,altura,altura/2); ctx.fillStyle=fundo; ctx.fill(); if(borda){ ctx.lineWidth=6; ctx.strokeStyle=borda; ctx.stroke(); }
+  ctx.fillStyle=cor; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(txt,cx,y+altura/2+2);
+}
+async function desenharCartao(a,pos){
+  const W=1080,H=1920, cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+  try{ await document.fonts.load('800 60px "Baloo 2"'); await document.fonts.load('700 40px "Baloo 2"'); }catch(e){}
+  const F=(peso,tam)=>`${peso} ${tam}px "Baloo 2", "Segoe UI", Arial, sans-serif`;
+  /* fundo de fogo */
+  const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#ff8a2a'); g.addColorStop(.45,'#ffb45a'); g.addColorStop(1,'#ffe3a3');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  /* topo: marca */
+  const chama=await carregaImg('img/ic_chama.png').catch(()=>null);
+  caixaArred(ctx,60,60,W-120,150,40); ctx.fillStyle='#3B1A0C'; ctx.fill(); ctx.lineWidth=8; ctx.strokeStyle='#ffb13d'; ctx.stroke();
+  if(chama) ctx.drawImage(chama,95,80,110,110);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.fillStyle='#fff'; ctx.font=F(800,72); ctx.fillText('EDIFÍCIO AURA',225,148);
+  ctx.fillStyle='#FFC83D'; ctx.font=F(700,40); ctx.fillText('@comenteaura',228,192);
+  /* o quarto: copia as camadas da tela do apê, no mesmo lugar */
+  const Q=document.getElementById('quarto'), qr=Q.getBoundingClientRect();
+  const QW=840,QX=(W-QW)/2,QY=250,QH=Math.round(QW*1400/1120);
+  ctx.save(); caixaArred(ctx,QX,QY,QW,QH,48); ctx.clip();
+  ctx.fillStyle='#f2a35a'; ctx.fillRect(QX,QY,QW,QH);
+  const k=QW/qr.width;
+  for(const el of Q.querySelectorAll('img')){
+    const r=el.getBoundingClientRect(); if(!r.width) continue;
+    const img=await carregaImg(el.getAttribute('src')).catch(()=>null); if(!img) continue;
+    const f=getComputedStyle(el).filter; ctx.filter=(f&&f!=='none')?f:'none';
+    if(el.classList.contains('fundo')) ctx.drawImage(img,QX,QY,QW,QH);
+    else ctx.drawImage(img,QX+(r.left-qr.left)*k,QY+(r.top-qr.top)*k,r.width*k,r.height*k);
+  }
+  ctx.filter='none';
+  if(a.m.atrasado){ ctx.fillStyle='#E8432B'; ctx.fillRect(QX,QY,QW,90); ctx.fillStyle='#fff'; ctx.font=F(800,44); ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('⚠️ ATRASADO · comenta AURA aí!',W/2,QY+48); }
+  ctx.restore();
+  caixaArred(ctx,QX,QY,QW,QH,48); ctx.lineWidth=12; ctx.strokeStyle='#3B1A0C'; ctx.stroke();
+  /* nome e endereço */
+  let y=QY+QH+40;
+  pilula(ctx,'@'+a.m.u,W/2,y,F(800,76),'#3B1A0C','#FFC83D','#FFC83D',50,120); y+=150;
+  const andar=a.vip?null:ANDARES-Math.floor(a.i/POR_ANDAR);
+  const onde=`${a.k==='CAP'?'Capital Aura':a.c.nome} · ${a.vip?'👑 Cobertura VIP':`Bloco ${a.b+1} · ${andar}º andar`}`;
+  ctx.fillStyle='#3B1A0C'; ctx.font=F(800,48); ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText('📍 '+onde,W/2,y); y+=40;
+  /* 3 números */
+  const caixas=[[a.m.auras,'AURAs no mês'],[pos>=0?(pos+1)+'º':'—','no ranking'],[(a.m.br||0).toLocaleString('pt-BR'),'🔥 Brasas']];
+  const cw=(W-120-2*24)/3;
+  caixas.forEach(([v,l],i)=>{ const x=60+i*(cw+24); caixaArred(ctx,x,y,cw,170,32); ctx.fillStyle='#FFF3D6'; ctx.fill(); ctx.lineWidth=7; ctx.strokeStyle='#3B1A0C'; ctx.stroke();
+    ctx.fillStyle='#3B1A0C'; ctx.font=F(800,72); ctx.textAlign='center'; ctx.fillText(String(v),x+cw/2,y+92); ctx.fillStyle='#8a5a3a'; ctx.font=F(700,34); ctx.fillText(l,x+cw/2,y+140); });
+  /* chamada no rodapé */
+  pilula(ctx,'Comente AURA no @comenteaura 🔥',W/2,H-200,F(800,50),'#E8432B','#fff','#3B1A0C',44,110);
+  ctx.fillStyle='#3B1A0C'; ctx.font=F(700,38); ctx.textAlign='center'; ctx.fillText('e ganhe seu apê no Edifício Aura',W/2,H-50);
+  return new Promise(ok=>cv.toBlob(ok,'image/png'));
+}
+async function abrirCartao(a,pos){
+  const M=document.getElementById('cartao'), P=document.getElementById('cartaoPrevia');
+  P.innerHTML='<span>Montando seu cartão…</span>'; M.hidden=false; cartaoBlob=null; cartaoNome=a.m.u;
+  try{ cartaoBlob=await desenharCartao(a,pos); P.innerHTML=`<img src="${URL.createObjectURL(cartaoBlob)}" alt="cartão do apê de @${esc(a.m.u)}">`; }
+  catch(e){ P.innerHTML='<span>Não deu pra montar a imagem aqui 😕</span>'; }
+  const podeArquivo=cartaoBlob&&navigator.canShare&&navigator.canShare({files:[new File([cartaoBlob],'apê.png',{type:'image/png'})]});
+  document.getElementById('cartaoEnviar').hidden=!podeArquivo;
+}
+document.getElementById('cartaoFechar').onclick=()=>document.getElementById('cartao').hidden=true;
+document.getElementById('cartao').onclick=e=>{ if(e.target.id==='cartao') e.target.hidden=true; };
+document.getElementById('cartaoEnviar').onclick=async()=>{ if(!cartaoBlob) return;
+  try{ await navigator.share({files:[new File([cartaoBlob],`edificio-aura-${cartaoNome}.png`,{type:'image/png'})],title:'Edifício Aura',text:`Meu apê no Edifício Aura 🔥 Comente AURA no @comenteaura!`}); }catch(e){} };
+document.getElementById('cartaoBaixar').onclick=()=>{ if(!cartaoBlob) return; const l=document.createElement('a');
+  l.href=URL.createObjectURL(cartaoBlob); l.download=`edificio-aura-${cartaoNome}.png`; document.body.appendChild(l); l.click(); l.remove(); };
+document.getElementById('cartaoLink').onclick=async()=>{ const url=location.href.split('?')[0]+'?u='+encodeURIComponent(cartaoNome);
+  const b=document.getElementById('cartaoLink'); try{ await navigator.clipboard.writeText(url); b.textContent='✅ Link copiado!'; }catch(e){ b.textContent=url; }
+  setTimeout(()=>b.textContent='🔗 Copiar link do meu apê',2500); };
+
+ver(vista);
+cam('brasil'); cam('cidade');
+/* para gravar vídeos: ?zoom=2 aproxima o mapa; ?voo=NE voa até a região */
+if(params.get('zoom')){ const c=cam(vista==='cidade'?'cidade':'brasil'); requestAnimationFrame(()=>c.zoomEm(c.sec.clientWidth/2,c.sec.clientHeight*.55,+params.get('zoom'),false)); }
+if(params.get('voo')) setTimeout(()=>{ const r=document.querySelector(`[data-reg="${params.get('voo')}"]`); r&&r.click(); },300);
+if(params.has('t')){ const tt=+params.get('t')*1000; document.getAnimations().forEach(an=>{an.pause(); an.currentTime=tt;}); }
+const fixo=params.get('relogio');
+if(fixo) document.getElementById('relogio').textContent=fixo; else { tique(); setInterval(tique,1000); setInterval(recarregar,60000); }
+if(params.has('cartao')&&params.get('u')) setTimeout(async()=>{ const a=acharMorador(params.get('u')); if(!a) return; abrirApe(a.m.u,true);
+  const pos=(D.ranking||[]).findIndex(x=>x.u===a.m.u); const b=await desenharCartao(a,pos); document.body.innerHTML=''; document.body.style.cssText='margin:0;background:#000';
+  const im=new Image(); im.src=URL.createObjectURL(b); im.style.cssText='width:100vw;display:block'; im.id='cartaoPronto'; document.body.appendChild(im); },400);
+if(params.get('u')){ const n=params.get('u').replace(/^@/,'').toLowerCase(); document.getElementById('q').value='@'+n; ver('predio'); setTimeout(()=>{ const a=acharMorador(n); if(a){ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; ver('ape'); abrirApe(n,params.has('semboasvindas')); } else mostrarNoPredio(n); },50); }
+const q=params.get('q');
+if(q){ document.getElementById('q').value='@'+q.replace(/^@/,''); instantaneo=true;
+  window.addEventListener('load',()=>{ mostrarNoPredio(q); instantaneo=false; }); }
+</script>
+</body>
+</html>
