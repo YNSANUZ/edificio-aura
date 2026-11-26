@@ -5,7 +5,7 @@ name: Motor do Edifício Aura
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # o GitHub às vezes atrasa alguns minutos
+    - cron: "3,13,23,33,43,53 * * * *"   # a cada 10 min (fora do minuto 0, que o GitHub costuma pular)
   workflow_dispatch: {}       # botão "Run workflow" para rodar na hora
 
 concurrency:
