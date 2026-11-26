@@ -96,7 +96,7 @@ class Regras(unittest.TestCase):
     def test_blocos_crescem_sozinhos(self):
         por_bloco = M.CONFIG["andares_por_bloco"] * M.CONFIG["aptos_por_andar"]
         n = por_bloco * 2 + 2  # 1 vai pra cobertura, sobram 2 blocos cheios + 1 morador
-        lote = [c(i, f"user{i}", "AURA", 0) for i in range(n)]
+        lote = [c(i, f"user{i}", "AURA SUL", 0) for i in range(n)]   # todos na mesma região
         with tempfile.TemporaryDirectory() as d:
             M.aplicar_lote(self.e, lote, T0)
             dados = M.exportar(self.e, T0, Path(d))
@@ -167,17 +167,25 @@ class Regras(unittest.TestCase):
             self.assertEqual(M.ler_regiao(txt), reg, txt)
         for txt in ["aura para todos", "aura to aqui", "aura rio de rir kkk"]:
             self.assertIsNone(M.ler_regiao(txt), txt)
-        M.aplicar_lote(self.e, [c(1, "ana", "AURA NE", 0), c(2, "bia", "AURA", 0), c(3, "ana", "aura sul", 1)], T0 + timedelta(hours=2))
+        M.aplicar_lote(self.e, [c(1, "ana", "AURA NE", 0), c(2, "bia", "AURA", 0), c(3, "ana", "aura sul", 200)], T0 + timedelta(hours=4))
         self.assertEqual(self.e["moradores"]["ana"]["regiao"], "S")
-        self.assertIsNone(self.e["moradores"]["bia"].get("regiao"))
+        bia = self.e["moradores"]["bia"]
+        self.assertTrue(bia["regiao_auto"])                                   # sem escolher: região automática
+        self.assertIn(bia["regiao"], ["N", "NE", "CO", "SE"])                 # a mais vazia (não o Sul da ana)
         with tempfile.TemporaryDirectory() as d:
-            dados = M.exportar(self.e, T0 + timedelta(hours=2), Path(d))
+            dados = M.exportar(self.e, T0 + timedelta(hours=4), Path(d))
         self.assertEqual(dados["regioes"]["S"]["moradores"], 1)
-        self.assertEqual(dados["regioes"]["CAP"]["moradores"], 1)
         self.assertEqual(dados["regiao_campea"], "S")
         self.assertEqual(dados["cidades"]["S"]["vip"]["u"], "ana")      # cada região é uma cidade
-        self.assertEqual(dados["cidades"]["CAP"]["vip"]["u"], "bia")
-        self.assertEqual(dados["cidades"]["N"]["total_moradores"], 0)
+        self.assertEqual(dados["cidades"][bia["regiao"]]["vip"]["u"], "bia")
+        self.assertNotIn("CAP", dados["cidades"])
+        self.assertEqual(sum(c["total_moradores"] for c in dados["cidades"].values()), 2)
+        # morador antigo sem região ganha uma; escolher depois tira o "automático"
+        self.e["moradores"]["bia"].pop("regiao"); M.garantir_regioes(self.e)
+        self.assertTrue(self.e["moradores"]["bia"]["regiao"])
+        M.aplicar_lote(self.e, [c(4, "bia", "AURA DF", 400)], T0 + timedelta(hours=8))
+        self.assertEqual(self.e["moradores"]["bia"]["regiao"], "CO")
+        self.assertNotIn("regiao_auto", self.e["moradores"]["bia"])
 
     def test_moveis_chegam_por_marcos(self):
         self.assertTrue(all(v == 0 for v in M.moveis_de(0).values()))
@@ -188,7 +196,7 @@ class Regras(unittest.TestCase):
         M.aplicar_lote(self.e, coms, T0 + timedelta(hours=14))
         self.assertEqual(self.e["moradores"]["ana"]["total_auras"], 4)
         with tempfile.TemporaryDirectory() as d:
-            f = M.exportar(self.e, T0 + timedelta(hours=14), Path(d))["cidades"]["CAP"]["vip"]
+            f = M.exportar(self.e, T0 + timedelta(hours=14), Path(d))["cidades"][self.e["moradores"]["ana"]["regiao"]]["vip"]
         self.assertEqual((f["tot"], f["br"], f["mv"]["tapete"]), (4, 40, 1))
 
     def test_ranking_da_semana(self):
@@ -197,6 +205,15 @@ class Regras(unittest.TestCase):
         sem = M.ranking_semana(self.e, T0 + timedelta(hours=12))
         self.assertEqual([(x["u"], x["n"]) for x in sem], [("ana", 3), ("bia", 1)])
         self.assertEqual(M.ranking_semana(self.e, T0 + timedelta(days=9)), [])   # passou a semana, zera
+
+    def test_praca_mostra_novos_e_ativos(self):
+        agora = T0 + timedelta(days=3)
+        coms = [c(1, "velho", "AURA", 0), c(2, "novo", "AURA", 3 * 24 * 60 - 300),
+                c(3, "velho", "AURA", 3 * 24 * 60 - 60), c(4, "sumido", "AURA", 60)]
+        M.aplicar_lote(self.e, coms, agora)
+        with tempfile.TemporaryDirectory() as d:
+            praca = M.exportar(self.e, agora, Path(d))["praca"]
+        self.assertEqual([(x["u"], x["novo"]) for x in praca], [("velho", False), ("novo", True)])
 
     def test_curtidas_pagam_aluguel_do_dono(self):
         M.aplicar_lote(self.e, [c(1, "ana", "AURA", 0)], T0)

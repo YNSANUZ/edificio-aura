@@ -222,6 +222,26 @@ def evento(estado: dict, tipo: str, quando: datetime, **dados) -> None:
 
 
 # ---------------------------------------------------------------- regras
+def regiao_automatica(estado: dict, usuario: str) -> str:
+    """Região de quem não escolheu: a que tem menos moradores (empate: espalha pelo @)."""
+    regs = list(CONFIG.get("regioes", {}) or ["SE"])
+    conta = {r: 0 for r in regs}
+    for u, m in estado["moradores"].items():
+        if u != usuario and m.get("status") != "despejado" and m.get("regiao") in conta:
+            conta[m["regiao"]] += 1
+    menor = min(conta.values())
+    empatadas = [r for r in regs if conta[r] == menor]
+    return empatadas[zlib.crc32(usuario.encode()) % len(empatadas)]
+
+
+def garantir_regioes(estado: dict) -> None:
+    """Moradores antigos sem região (da época da Capital Aura) ganham uma região automática."""
+    for u, m in sorted(estado["moradores"].items(), key=lambda x: x[1].get("entrou_em", "")):
+        if not m.get("regiao"):
+            m["regiao"] = regiao_automatica(estado, u)
+            m["regiao_auto"] = True
+
+
 def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quando: datetime) -> str:
     """Aplica um comentário. Retorna o que aconteceu (para log/testes)."""
     vistos = estado.setdefault("_vistos_set", set(estado["comentarios_vistos"]))
@@ -254,6 +274,10 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
         if not novo:
             evento(estado, "mudou_regiao", quando, usuario=usuario, regiao=reg)
         m["regiao"] = reg
+        m.pop("regiao_auto", None)
+    elif not m.get("regiao"):
+        m["regiao"] = regiao_automatica(estado, usuario)   # quem não escolhe entra na região mais vazia
+        m["regiao_auto"] = True
     if not novo and num:
         if num != m["personagem"]:
             evento(estado, "trocou_personagem", quando, usuario=usuario, personagem=num)
@@ -419,8 +443,8 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
                 "total_blocos": n_blocos if lista else 0, "blocos": blocos}
 
     cidades = {}
-    for cod, nome in [(None, "Capital Aura")] + list(CONFIG.get("regioes", {}).items()):
-        cidades[cod or "CAP"] = montar_cidade(nome, [t for t in rk if t[1].get("regiao") == cod])
+    for cod, nome in CONFIG.get("regioes", {}).items():
+        cidades[cod] = montar_cidade(nome, [t for t in rk if t[1].get("regiao") == cod])
     n_blocos = max(1, sum(c["total_blocos"] for c in cidades.values()))
 
     proximo = min((momento_despejo(m) for _, m, _ in rk), default=None)
@@ -437,13 +461,28 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
         key=lambda d: d["quando"], reverse=True)
     despejados = pracinha[:20]
 
+    # Praça: quem chegou nas últimas 24h + quem está "ativo agora" (comentou AURA nas últimas 3h).
+    # Quando o banco tiver tempo real, o site soma quem está ONLINE de verdade.
+    novos_desde, ativos_desde = agora - timedelta(hours=24), agora - timedelta(hours=3)
+    praca = []
+    for u, m in estado["moradores"].items():
+        if m["status"] == "despejado":
+            continue
+        novo = de_iso(m["entrou_em"]) >= novos_desde
+        ativo = bool(m["ultimo_aura"]) and de_iso(m["ultimo_aura"]) >= ativos_desde
+        if novo or ativo:
+            praca.append({"u": u, "p": m["personagem"], "r": m.get("regiao"), "novo": novo,
+                          "t": max(m["entrou_em"], m["ultimo_aura"] or "")})
+    praca.sort(key=lambda x: x["t"], reverse=True)
+    praca = [{k: v for k, v in x.items() if k != "t"} for x in praca[:40]]
+
     niveis = CONFIG.get("regiao_niveis", [1, 10, 50])
     regioes = {}
-    for cod, nome in list(CONFIG.get("regioes", {}).items()) + [(None, "Capital Aura")]:
+    for cod, nome in CONFIG.get("regioes", {}).items():
         gente = [(u, n) for u, m, n in rk if m.get("regiao") == cod]
-        regioes[cod or "CAP"] = {"nome": nome, "moradores": len(gente), "auras_mes": sum(n for _, n in gente),
+        regioes[cod] = {"nome": nome, "moradores": len(gente), "auras_mes": sum(n for _, n in gente),
                                  "nivel": sum(1 for x in niveis if len(gente) >= x) + 1}
-    campea = max((k for k in regioes if k != "CAP"), key=lambda k: regioes[k]["auras_mes"], default=None)
+    campea = max(regioes, key=lambda k: regioes[k]["auras_mes"], default=None)
     if campea and not regioes[campea]["auras_mes"]:
         campea = None
 
@@ -457,6 +496,7 @@ def exportar(estado: dict, agora: datetime, pasta_site: Path) -> dict:
         "cidades": cidades,
         "saldo_maximo_horas": CONFIG.get("barra_cheia_horas", teto),
         "regras_dias_gratis": round(CONFIG["saldo_inicial_horas"] / 24),
+        "praca": praca,
         "vip": vip,
         "ranking": [{"u": u, "p": m["personagem"], "r": m.get("regiao"), "n": n} for u, m, n in rk[:100]],
         "ranking_semana": ranking_semana(estado, agora)[:100],
@@ -511,7 +551,7 @@ def regras_texto(agora: datetime | None = None) -> list[str]:
                  "comenta, chegam móveis e decoração (cama, tapete, sofá, planta, luminária, cortina, quadro). Se for despejado, seus móveis vão no caminhão e voltam com você.")
     if c.get("regioes"):
         r.append("Escolha sua região do Brasil Aura comentando AURA + a região ou o seu estado (ex.: AURA NE, AURA SUL, "
-                 "AURA BAHIA, AURA SP, AURA DF). Quem não escolher mora na Capital Aura. A região com mais AURAs no mês ganha a chama.")
+                 "AURA BAHIA, AURA SP, AURA DF). Quem não escolher entra sozinho na região com menos moradores e pode trocar quando quiser. A região com mais AURAs no mês ganha a chama.")
     if c.get("horas_por_curtida") and c.get("banco_ligado"):   # só aparece quando a lojinha/senha estiver no ar
         r.append(f"Quem entra com @ e senha pode visitar quartos e curtir: cada curtida no seu quarto paga "
                  f"{_tempo(c['horas_por_curtida'])} de aluguel (até {_tempo(c['horas_por_curtida'] * c.get('curtidas_pagas_max_dia', 18))} por dia), "
@@ -543,6 +583,7 @@ def gravar_regras_md(destino: Path, agora: datetime | None = None) -> None:
 def aplicar_lote(estado: dict, comentarios: list[dict], agora: datetime) -> dict:
     """Processa comentários em ordem de horário e despeja quem venceu no meio do caminho."""
     contagem: dict[str, int] = {}
+    garantir_regioes(estado)
     for c in sorted(comentarios, key=lambda c: c["timestamp"]):
         quando = de_iso(c["timestamp"])
         atualizar(estado, quando)
