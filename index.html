@@ -319,6 +319,27 @@
   .quarto .faixa{position:absolute; left:0; right:0; top:0; z-index:6; text-align:center; color:#fff; font-weight:800; font-size:14px; padding:4px 8px;
           background:var(--brasa); border-bottom:3px solid var(--carvao)}
   .quarto .faixa.laranja{background:var(--laranja)}
+  /* visita: o boneco de quem entrou com senha anda dentro do quarto dos outros */
+  .quarto .chaoToque{position:absolute; left:3%; right:3%; top:60%; bottom:1%; z-index:3; cursor:pointer}
+  .quarto .visita{position:absolute; left:8%; top:96%; height:33%; transform:translate(-50%,-100%); z-index:4; pointer-events:none;
+        transition-property:left,top; transition-timing-function:linear}
+  .quarto .visita img{height:100%; display:block; filter:drop-shadow(0 8px 5px #0005)}
+  .quarto .visita.esq img{transform:scaleX(-1)}
+  .quarto .visita.andando img{animation:passo .28s ease-in-out infinite alternate}
+  @keyframes passo{from{translate:0 0}to{translate:0 -5%}}
+  .quarto .visita .tagv{position:absolute; bottom:100%; left:50%; transform:translateX(-50%); white-space:nowrap; background:var(--laranja);
+        color:#fff; font-weight:800; font-size:12px; border:2px solid var(--carvao); border-radius:10px; padding:0 7px; margin-bottom:2px}
+  .quarto .bal{position:absolute; bottom:calc(100% + 24px); left:50%; transform:translateX(-50%); white-space:nowrap; background:#fff;
+        border:3px solid var(--carvao); border-radius:14px; padding:1px 10px; font-weight:800; font-size:16px; animation:pula .35s cubic-bezier(.3,1.6,.5,1)}
+  .ficha .visitas{margin:8px 0 2px; background:#fff; border:2px solid var(--carvao); border-radius:14px; padding:6px 8px}
+  .ficha .visitas b.t{display:block; font-size:14px}
+  .ficha .reacoes{display:flex; gap:5px; flex-wrap:wrap; margin:4px 0}
+  .ficha .reacoes button{border:2px solid var(--carvao); border-radius:12px; background:var(--amarelo); font-size:18px; padding:0 8px; cursor:pointer; line-height:30px}
+  .ficha .reacoes button[disabled]{background:#eee; cursor:default}
+  .ficha .mural{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}
+  .ficha .mural span{background:#fff3c4; border-radius:10px; padding:0 7px; font-weight:700; font-size:12.5px}
+  .ficha .novas{background:var(--laranja); color:#fff; border-radius:10px; padding:1px 8px; font-weight:800; font-size:13px; display:inline-block; margin:2px 0}
+  .ficha .dicaVis{font-size:12.5px; font-weight:700; color:#8a5a3a; margin:2px 0 0}
   .ficha{margin:0 10px 12px; background:var(--creme); border:3px solid var(--carvao); border-radius:20px; box-shadow:0 4px 0 var(--carvao); padding:10px 12px}
   .ficha h2{margin:0; font-size:24px; line-height:1.1}
   .ficha .onde{font-weight:800; color:#8a5a3a; font-size:14px}
@@ -957,6 +978,7 @@ function abrirApe(nome,silencioso){
   if(m.atrasado) q+=`<div class="faixa">⚠️ ATRASADO · comente AURA antes do caminhão chegar!</div>`;
   else if(m.alerta) q+=`<div class="faixa laranja">⏳ VENCENDO · falta ${fmtTempo(m)} de aluguel</div>`;
   const Q=document.getElementById('quarto'); Q.innerHTML=q; Q.classList.toggle('atrasado',!!m.atrasado);
+  montarVisita(Q,m);
   const pos=(D.ranking||[]).findIndex(x=>x.u===m.u);
   const pct=Math.max(3,Math.min(100,m.horas/D.saldo_maximo_horas*100));
   const desde=m.desde?m.desde.split('-').reverse().slice(0,2).join('/'):'—';
@@ -970,12 +992,14 @@ function abrirApe(nome,silencioso){
     +`<div class="grade"><div><b>${m.auras}</b><small>AURAs no mês</small></div><div><b>${(lojaEstado&&lojaEstado.u===m.u?lojaEstado.saldo:m.br||0).toLocaleString('pt-BR')}</b><small>🔥 Brasas</small></div>`
     +`<div><b>${pos>=0?pos+1+'º':'—'}</b><small>no ranking</small></div><div><b>${desde}</b><small>mora desde</small></div></div>`
     +prox
+    +`<div class="visitas" id="visitasApe"></div>`
     +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`
-    +(Casa.ligada?`<div class="botoes dois"><button class="loja" id="apeLoja">${Casa.sessao&&Casa.sessao.u===m.u?'🛍️ Lojinha · decorar meu quarto':'🔑 É meu quarto? Entrar'}</button></div>`:'');
-  if(Casa.ligada) document.getElementById('apeLoja').onclick=()=>Casa.sessao&&Casa.sessao.u===m.u?abrirLoja():abrirEntrar(m.u);
+    +(Casa.ligada?`<div class="botoes dois"><button class="loja" id="apeLoja">${Casa.sessao&&Casa.sessao.u===m.u?'🛍️ Lojinha · decorar meu quarto':Casa.sessao?'🏠 Voltar pro meu quarto':'🔑 É meu quarto? Entrar'}</button></div>`:'');
+  if(Casa.ligada) document.getElementById('apeLoja').onclick=()=>Casa.sessao&&Casa.sessao.u===m.u?abrirLoja():Casa.sessao?buscar(Casa.sessao.u):abrirEntrar(m.u);
   pedirUso(nome);
   document.getElementById('apeVerPredio').onclick=()=>voarPara('predio',()=>{ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; montar(); setTimeout(()=>mostrarNoPredio(m.u),50); });
   document.getElementById('apeCompartilhar').onclick=()=>abrirCartao(a,pos);
+  pedirMural(m.u);
   if(!silencioso) boasVindas(m);
 }
 /* boas-vindas: só na 1ª vez que a pessoa abre o próprio apê neste aparelho, enquanto ainda está nos dias grátis */
@@ -1007,7 +1031,7 @@ const PECAS=[['cama','🛏️ Cama'],['sofa','🛋️ Sofá'],['tapete','🟫 Ta
 const PRECO={1:30,2:80,3:200,4:450,5:900};
 const ERROS={NAO_MORA:'Esse @ ainda não mora no prédio. Comente AURA num post do @comenteaura!',SENHA_ERRADA:'Senha errada. Confira na sua DM do Instagram.',
   BLOQUEADO:'Muitas tentativas erradas. Este quarto ficou trancado por um tempo — tente de novo mais tarde.',SEM_BRASAS:'Faltam Brasas. Comente AURA pra ganhar mais 🔥',
-  JA_TEM:'Você já tem essa peça.',NAO_TEM:'Você ainda não tem essa peça.',REDE:'Sem conexão agora. Tente de novo em instantes.'};
+  JA_TEM:'Você já tem essa peça.',PROPRIO:'Esse é o seu quarto 😉',REACAO:'Reação inválida.',NAO_TEM:'Você ainda não tem essa peça.',REDE:'Sem conexão agora. Tente de novo em instantes.'};
 const BANCO=window.AURA_BANCO||{};
 const Casa={
   /* modo teste só no PC (localhost) ou com ?lojasim; no site público sem banco o botão nem aparece */
@@ -1104,6 +1128,68 @@ document.getElementById('lojaGuardar').onclick=()=>lojaAcao('usar',0);
 document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja').hidden=true;
 function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); if(praca3d) base3d(); }
 document.getElementById('lojaSair').onclick=sairLoja;
+
+/* ===== Visitas: andar no quarto dos outros, curtir e mural ===== */
+const REACOES=['❤️','🔥','🛋️','👋','😍','👑'];
+const FALA_REACAO={'❤️':'❤️ Curti seu quarto!','🔥':'🔥 Que aura!','🛋️':'🛋️ Que sofá!','👋':'👋 Passei aqui!','😍':'😍 Que lindo!','👑':'👑 Quarto de rei!'};
+const muralCache={};
+const hojeBR=()=>new Date(Date.now()-3*3600e3).toISOString().slice(0,10);
+function souVisita(m){ const s=Casa.sessao; return !!(Casa.ligada&&s&&s.u!==m.u&&acharMorador(s.u)); }
+function montarVisita(Q,m){
+  if(!souVisita(m)) return;
+  const eu=acharMorador(Casa.sessao.u).m;
+  const chao=document.createElement('div'); chao.className='chaoToque'; Q.appendChild(chao);
+  const v=document.createElement('div'); v.className='visita'; v.id='visitaEu';
+  v.innerHTML=`<div class="tagv">@${esc(eu.u)} · visita</div><img src="img/corpo${eu.p}.png" alt="seu boneco visitando">`;
+  Q.appendChild(v);
+  const mover=(x,y)=>{ const ox=parseFloat(v.style.left)||8, oy=parseFloat(v.style.top)||96;
+    const d=Math.hypot(x-ox,(y-oy)*.8), t=Math.max(.25,d/28);
+    v.classList.toggle('esq',x<ox); v.classList.add('andando'); v.style.transitionDuration=t+'s';
+    v.style.left=x+'%'; v.style.top=y+'%'; clearTimeout(v._p); v._p=setTimeout(()=>v.classList.remove('andando'),t*1000); };
+  setTimeout(()=>mover(30,92),80);   // entra pela porta
+  chao.addEventListener('click',e=>{ const r=Q.getBoundingClientRect();
+    const x=Math.max(6,Math.min(94,(e.clientX-r.left)/r.width*100)), y=Math.max(64,Math.min(99,(e.clientY-r.top)/r.height*100)); mover(x,y); });
+}
+function falarVisita(txt){ const v=document.getElementById('visitaEu'); if(!v) return;
+  v.querySelector('.bal')?.remove(); const b=document.createElement('div'); b.className='bal'; b.textContent=txt; v.appendChild(b);
+  clearTimeout(v._b); v._b=setTimeout(()=>b.remove(),4000); }
+async function pedirMural(dono){
+  let lista=[];
+  if(Casa.simulado){ try{ lista=(JSON.parse(localStorage.getItem('aura_sim_curt'))||[]).filter(c=>c.dono===dono).reverse(); }catch(e){} }
+  else if(BANCO.url){ try{ const r=await fetch(BANCO.url.replace(/\/$/,'')+'/rest/v1/curtidas?select=visitante,reacao,dia,quando&order=quando.desc&limit=30&dono=eq.'+encodeURIComponent(dono),
+      {headers:{apikey:BANCO.chave,Authorization:'Bearer '+BANCO.chave}}); lista=await r.json(); }catch(e){} }
+  muralCache[dono]=Array.isArray(lista)?lista:[]; desenharVisitas(dono);
+}
+function desenharVisitas(dono){
+  const el=document.getElementById('visitasApe'); if(!el||apeNome!==dono) return;
+  const a=acharMorador(dono); if(!a) return;
+  const lista=muralCache[dono]||[], hoje=lista.filter(c=>c.dia===hojeBR()).length;
+  let h=`<b class="t">👀 Visitas ${hoje?`· ${hoje} hoje`:''}</b>`;
+  const s=Casa.sessao;
+  if(s&&s.u===dono){
+    let visto=0; try{ visto=+localStorage.getItem('aura_vis_'+dono)||0; }catch(e){}
+    const novas=lista.filter(c=>Date.parse(c.quando)>visto).length;
+    if(novas) h+=`<span class="novas">🎉 ${novas} curtida${novas>1?'s':''} nova${novas>1?'s':''} no seu quarto!</span>`;
+    try{ if(lista[0]) localStorage.setItem('aura_vis_'+dono,Date.parse(lista[0].quando)); }catch(e){}
+  } else if(souVisita(a.m)){
+    const ja=lista.some(c=>c.visitante===s.u&&c.dia===hojeBR());
+    h+=ja?'<p class="dicaVis">✓ Você já curtiu este quarto hoje. Volte amanhã!</p>'
+         :`<div class="reacoes">${REACOES.map(r=>`<button data-r="${r}" aria-label="curtir com ${r}">${r}</button>`).join('')}</div><p class="dicaVis">Sua curtida paga 2h do aluguel de @${esc(dono)} e te dá 1 🔥 Brasa · toque no chão pra andar</p>`;
+  } else if(Casa.ligada) h+='<p class="dicaVis">🔑 Entre com seu @ e senha pra visitar com seu boneco e curtir este quarto.</p>';
+  h+=lista.length?`<div class="mural">${lista.slice(0,12).map(c=>`<span>${c.reacao} @${esc(c.visitante)}</span>`).join('')}</div>`:'<p class="dicaVis">Ninguém visitou ainda. Seja o primeiro!</p>';
+  el.innerHTML=h;
+  el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>curtirQuarto(dono,b.dataset.r));
+}
+async function curtirQuarto(dono,reacao){
+  const s=Casa.sessao; falarVisita(FALA_REACAO[reacao]||reacao);
+  try{
+    if(Casa.simulado){ const L=JSON.parse(localStorage.getItem('aura_sim_curt')||'[]');
+      if(!L.some(c=>c.dono===dono&&c.visitante===s.u&&c.dia===hojeBR())) L.push({dono,visitante:s.u,reacao,dia:hojeBR(),quando:new Date().toISOString()});
+      localStorage.setItem('aura_sim_curt',JSON.stringify(L)); }
+    else await Casa.rpc('curtir',{p_u:s.u,p_senha:s.senha,p_dono:dono,p_reacao:reacao});
+  }catch(e){ const el=document.getElementById('visitasApe'); if(el) el.insertAdjacentHTML('beforeend',`<p class="dicaVis">${ERROS[e.message]||ERROS.REDE}</p>`); return; }
+  pedirMural(dono);
+}
 
 /* ===== Praça Aura 3D (three.js, carregada só quando abre a aba) ===== */
 let praca3d=null, praca3dCarregando=false;
