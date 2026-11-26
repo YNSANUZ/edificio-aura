@@ -350,6 +350,17 @@
   .ficha .mural{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}
   .ficha .mural span{background:#fff3c4; border-radius:10px; padding:0 7px; font-weight:700; font-size:12.5px}
   .ficha .novas{background:var(--laranja); color:#fff; border-radius:10px; padding:1px 8px; font-weight:800; font-size:13px; display:inline-block; margin:2px 0}
+  .ficha .dicas{margin:8px 0 2px; background:#fff8e6; border:2px solid var(--carvao); border-radius:14px; padding:6px 8px; font-size:13.5px; font-weight:700; line-height:1.35}
+  .ficha .dicas b.t{display:block; font-size:14px; margin-bottom:2px}
+  .ficha .dicas p{margin:4px 0; display:flex; gap:8px; align-items:flex-start}
+  .ficha .dicas p>span:first-child{flex:0 0 22px; font-size:17px; text-align:center}
+  .ficha .dicas p>span+span{flex:1}
+  .ficha .dicas button{margin-left:4px; border:2px solid var(--carvao); border-radius:10px; background:var(--amarelo); font:800 12.5px 'Baloo 2',sans-serif; padding:0 8px; cursor:pointer; color:var(--carvao)}
+  .galeria{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:8px}
+  .galeria button{border:2px solid var(--carvao); border-radius:12px; background:#fff; padding:2px 2px 0; cursor:pointer; font:800 13px 'Baloo 2',sans-serif; color:var(--carvao)}
+  .galeria button.bonecoAtual{background:var(--amarelo)}
+  .galeria img{width:100%; height:64px; object-fit:contain; display:block}
+  .galeriaDica{text-align:center; font-weight:800; font-size:16px; margin-top:8px; min-height:24px; color:var(--laranja)}
   .ficha .contador{display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 4px}
   .ficha .contador span{background:var(--carvao); color:var(--amarelo); border-radius:10px; padding:0 8px; font-weight:800; font-size:13px}
   .ficha .comoEntrar{background:#fff3c4; border:2px dashed var(--laranja); border-radius:12px; padding:6px 8px; margin:6px 0; font-weight:700; font-size:13.5px; line-height:1.35}
@@ -1014,6 +1025,9 @@ function abrirApe(nome,silencioso){
     +`<div class="grade"><div><b>${m.auras}</b><small>AURAs no mês</small></div><div><b>${(lojaEstado&&lojaEstado.u===m.u?lojaEstado.saldo:m.br||0).toLocaleString('pt-BR')}</b><small>🔥 Brasas</small></div>`
     +`<div><b>${pos>=0?pos+1+'º':'—'}</b><small>no ranking</small></div><div><b>${desde}</b><small>mora desde</small></div></div>`
     +prox
+    +`<div class="dicas"><b class="t">💡 Como mudar</b>`
+      +`<p><span>🧍</span><span>Trocar de boneco: comente <b>AURA + número</b> de 1 a 20 (ex.: AURA 7)<button id="verBonecos">ver os 20</button></span></p>`
+      +`<p><span>🗺️</span><span>Mudar de região: comente <b>AURA + região ou estado</b> (ex.: AURA NE, AURA SP, AURA DF)</span></p></div>`
     +`<div class="visitas" id="visitasApe"></div>`
     +`<div class="botoes"><button class="claro" id="apeVerPredio">🏢 Ver no prédio</button><button id="apeCompartilhar">📸 Cartão pro story</button></div>`
     +(Casa.ligada?`<div class="botoes dois"><button class="loja" id="apeLoja">${Casa.sessao&&Casa.sessao.u===m.u?'🛍️ Lojinha · decorar meu quarto':Casa.sessao?'🏠 Voltar pro meu quarto':'🔑 É meu quarto? Entrar'}</button></div>`:'');
@@ -1021,6 +1035,7 @@ function abrirApe(nome,silencioso){
   pedirUso(nome);
   document.getElementById('apeVerPredio').onclick=()=>voarPara('predio',()=>{ cidadeAtual=a.k; blocoAtual=a.vip?0:a.b; montar(); setTimeout(()=>mostrarNoPredio(m.u),50); });
   document.getElementById('apeCompartilhar').onclick=()=>abrirCartao(a,pos);
+  document.getElementById('verBonecos').onclick=()=>abrirGaleria(m.p);
   pedirMural(m.u);
   if(!silencioso||!statsCache[m.u]) contarVisualizacao(m.u);
   if(!silencioso) boasVindas(m);
@@ -1167,6 +1182,16 @@ document.getElementById('lojaGuardar').onclick=()=>lojaAcao('usar',0);
 document.getElementById('lojaFechar').onclick=()=>document.getElementById('loja').hidden=true;
 function sairLoja(){ Casa.sessao=null; try{ localStorage.removeItem('aura_sessao'); }catch(e){} document.getElementById('loja').hidden=true; if(apeNome) abrirApe(apeNome,true); if(praca3d) base3d(); }
 document.getElementById('lojaSair').onclick=sairLoja;
+
+/* ===== Galeria dos 20 bonecos: toca num e aparece "comente AURA N" ===== */
+function abrirGaleria(atual){
+  document.getElementById('bvTexto').innerHTML=`<h2>🧍 Escolha seu boneco</h2><p>Comente <b>AURA + o número</b> em qualquer post do @comenteaura</p>`
+    +`<div class="galeria">${Array.from({length:20},(_,i)=>i+1).map(n=>`<button data-boneco="${n}" class="${n===atual?'bonecoAtual':''}"><img src="img/corpo${n}.png" alt="boneco ${n}" loading="lazy">${n}</button>`).join('')}</div>`
+    +`<div class="galeriaDica" id="galeriaDica">${atual?`Hoje você usa o boneco ${atual}`:''}</div>`;
+  document.getElementById('boasVindas').hidden=false;
+  document.querySelector('#bvTexto .galeria').onclick=e=>{ const b=e.target.closest('[data-boneco]'); if(!b) return;
+    document.getElementById('galeriaDica').textContent=`💬 Comente "AURA ${b.dataset.boneco}" pra usar este boneco`; };
+}
 
 /* ===== Visitas: andar no quarto dos outros, curtir e mural ===== */
 const REACOES=['❤️','🔥','🛋️','👋','😍','👑'];
