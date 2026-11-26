@@ -77,7 +77,9 @@ function hash(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(
 function pontoAleatorio(r = RAIO - 2) { const a = Math.random() * Math.PI * 2, d = 3.5 + Math.random() * (r - 3.5); return new THREE.Vector3(Math.sin(a) * d, 0, Math.cos(a) * d); }
 
 /* ---------- pessoas (bonecos 2D em pé, sempre de frente para a câmera) ---------- */
-function criarPessoa(cena, { u = null, p = 1, figurante = false }) {
+export const fmtNum = (n) => n >= 1e6 ? (n / 1e6).toFixed(1).replace(".0", "").replace(".", ",") + " mi" : n >= 1e3 ? (n / 1e3).toFixed(1).replace(".0", "").replace(".", ",") + " mil" : String(n);
+
+function criarPessoa(cena, { u = null, p = 1, figurante = false, v = 0 }) {
   const g = new THREE.Group();
   const mat = new THREE.SpriteMaterial({ map: texBoneco(p), transparent: true, alphaTest: .2 });
   const corpo = new THREE.Sprite(mat); corpo.center.set(.5, 0);
@@ -88,7 +90,7 @@ function criarPessoa(cena, { u = null, p = 1, figurante = false }) {
   const sombra = new THREE.Mesh(new THREE.CircleGeometry(.55, 20), new THREE.MeshBasicMaterial({ color: 0x5a2d0c, transparent: true, opacity: .28 }));
   sombra.rotation.x = -Math.PI / 2; sombra.position.y = .02; g.add(sombra);
   let tag = null;
-  if (u) { tag = etiqueta("@" + u); tag.position.y = alt + .45; g.add(tag); }
+  if (u) { tag = etiqueta("@" + u + (v ? "  👁 " + fmtNum(v) : "")); tag.position.y = alt + .45; g.add(tag); }
   g.position.copy(pontoAleatorio());
   cena.add(g);
   const fase = hash(u || String(Math.random())) * 10;
@@ -239,7 +241,7 @@ export function abrir(host, ctx) {
   const sincronizar = (D) => {
     const gente = escolherGente(D), nomes = new Set(gente.map((m) => m.u));
     pessoas = pessoas.filter((p) => { const fica = p.figurante ? false : nomes.has(p.u) || p.eu; if (!fica) cena.remove(p.g); return fica; });
-    for (const m of gente) if (!pessoas.some((p) => p.u === m.u && !p.eu)) pessoas.push(criarPessoa(cena, { u: m.u, p: m.p || 1 }));
+    for (const m of gente) if (!pessoas.some((p) => p.u === m.u && !p.eu)) pessoas.push(criarPessoa(cena, { u: m.u, p: m.p || 1, v: m.v || 0 }));
     const faltam = Math.max(0, 3 - pessoas.filter((p) => !p.eu).length);   // praça vazia: 3 passantes sem @
     for (let i = 0; i < faltam; i++) pessoas.push(criarPessoa(cena, { p: 1 + Math.floor(Math.random() * 20), figurante: true }));
     telao.atualizar(D);
