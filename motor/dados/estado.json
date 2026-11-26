@@ -1,12 +1,38 @@
 {
- "moradores": {},
+ "moradores": {
+  "gatito.anime": {
+   "personagem": 19,
+   "pago_ate": "2026-12-06T14:50:26+00:00",
+   "auras": [
+    "2026-11-26T14:50:26+00:00"
+   ],
+   "status": "ativo",
+   "entrou_em": "2026-11-26T14:50:26+00:00",
+   "ultimo_aura": "2026-11-26T14:50:26+00:00",
+   "total_auras": 1
+  }
+ },
  "comentarios_vistos": [
   "18193272739409184",
   "18184775227435892",
   "17895953286653736",
   "17894398533458021",
-  "18352036072264724"
+  "18352036072264724",
+  "18133515274916160",
+  "18227147818340077",
+  "18139512352734986"
  ],
- "eventos": [],
- "top1": null
+ "eventos": [
+  {
+   "tipo": "novo_morador",
+   "quando": "2026-11-26T14:50:26+00:00",
+   "usuario": "gatito.anime"
+  },
+  {
+   "tipo": "novo_top1",
+   "quando": "2026-11-26T14:50:47+00:00",
+   "usuario": "gatito.anime"
+  }
+ ],
+ "top1": "gatito.anime"
 }
