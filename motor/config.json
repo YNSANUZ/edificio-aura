@@ -111,5 +111,11 @@
   "curtidas_pagas_max_dia": 18,
   "brasas_por_visita": 1,
   "visitas_brasas_max_dia": 10,
-  "banco_ligado": false
+  "banco_ligado": false,
+  "dm": {
+    "ligado": false,
+    "so_teste": true,
+    "contas_teste": [],
+    "max_por_ciclo": 20
+  }
 }

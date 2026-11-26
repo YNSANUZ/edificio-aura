@@ -59,6 +59,13 @@ def ciclo_real() -> None:
             log(msg_banco)
     except Exception as e:  # banco fora do ar não pode parar o prédio
         log(f"Banco da lojinha: não consegui atualizar agora ({str(e)[:150]})")
+    try:  # DM com a senha do quarto (só se "dm.ligado" no config; trava de teste por padrão)
+        import dm
+        msg_dm = dm.enviar_pendentes(estado, agora)
+        if msg_dm:
+            log(msg_dm)
+    except Exception as e:
+        log(f"DM: não consegui enviar agora ({str(e)[:150]})")
     M.salvar(estado)
     try:
         import quartos_db

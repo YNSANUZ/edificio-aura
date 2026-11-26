@@ -259,6 +259,8 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
 
     m = estado["moradores"].get(usuario)
     novo = m is None
+    if m is not None:   # guarda o último comentário AURA (a DM com a senha responde a ele, até 7 dias depois)
+        m["ultimo_cid"], m["ultimo_cid_em"] = cid, iso(quando)
     if novo:
         m = {
             "personagem": num or personagem_padrao(usuario),
@@ -267,6 +269,8 @@ def processar_comentario(estado: dict, cid: str, usuario: str, texto: str, quand
             "status": "ativo",
             "entrou_em": iso(quando),
             "ultimo_aura": None,
+            "ultimo_cid": cid,
+            "ultimo_cid_em": iso(quando),
         }
         estado["moradores"][usuario] = m
     reg = ler_regiao(texto)

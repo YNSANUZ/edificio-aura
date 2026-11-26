@@ -227,6 +227,34 @@ class Regras(unittest.TestCase):
         self.assertEqual(M.de_iso(self.e["moradores"]["ana"]["pago_ate"]), M.avancar(antes, 2 * h))
         self.assertEqual(M.creditar_curtidas(self.e, cur, T0 + timedelta(hours=3)), 0)   # não conta de novo
 
+    def test_dm_so_para_teste_e_uma_vez(self):
+        import dm, os
+        os.environ["AURA_SEGREDO"] = "segredo-teste"
+        coms = [c(1, "ana", "AURA NE", 0), c(2, "bia", "AURA", 0), c(3, "caio", "AURA", 0)]
+        agora = T0 + timedelta(hours=1)
+        M.aplicar_lote(self.e, coms, agora)
+        enviados = []
+        fake = lambda cid, msg: enviados.append((cid, msg))
+        antigo = M.CONFIG.get("dm")
+        try:
+            M.CONFIG["dm"] = {"ligado": False}
+            self.assertEqual(dm.enviar_pendentes(self.e, agora, fake), "")          # desligado: nada
+            M.CONFIG["dm"] = {"ligado": True, "so_teste": True, "contas_teste": ["@ana"]}
+            dm.enviar_pendentes(self.e, agora, fake)
+            self.assertEqual([x[0] for x in enviados], ["c1"])                       # só a conta de teste
+            self.assertIn("Senha do seu quarto: ", enviados[0][1])
+            self.assertIn("Nordeste", enviados[0][1])
+            dm.enviar_pendentes(self.e, agora, fake)
+            self.assertEqual(len(enviados), 1)                                      # não repete
+            M.CONFIG["dm"] = {"ligado": True, "so_teste": False}
+            dm.enviar_pendentes(self.e, T0 + timedelta(days=8), fake)
+            self.assertEqual(len(enviados), 1)                                      # passou 7 dias: não manda
+            dm.enviar_pendentes(self.e, agora, fake)
+            self.assertEqual(sorted(x[0] for x in enviados), ["c1", "c2", "c3"])
+        finally:
+            M.CONFIG["dm"] = antigo
+            os.environ.pop("AURA_SEGREDO", None)
+
     def test_senha_do_quarto(self):
         import hashlib, quartos_db as Q
         s1, s2 = Q.senha_de("Ana", "segredo-teste"), Q.senha_de("ana", "segredo-teste")
