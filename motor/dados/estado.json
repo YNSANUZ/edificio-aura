@@ -30,6 +30,21 @@
    "regiao": "CO",
    "total_auras": 1,
    "curtidas": 1
+  },
+  "renatabernardes9860": {
+   "personagem": 14,
+   "pago_ate": "2026-12-27T18:53:17+00:00",
+   "auras": [
+    "2026-11-27T18:53:17+00:00"
+   ],
+   "status": "ativo",
+   "entrou_em": "2026-11-27T18:53:17+00:00",
+   "ultimo_aura": "2026-11-27T18:53:17+00:00",
+   "ultimo_cid": "17890747986689782",
+   "ultimo_cid_em": "2026-11-27T18:53:17+00:00",
+   "regiao": "NE",
+   "regiao_auto": true,
+   "total_auras": 1
   }
  },
  "comentarios_vistos": [
@@ -45,7 +60,8 @@
   "17908344501602632",
   "18399361324203957",
   "18165489121552533",
-  "18400940833165578"
+  "18400940833165578",
+  "17890747986689782"
  ],
  "eventos": [
   {
@@ -90,6 +106,11 @@
    "quando": "2026-11-26T19:06:58+00:00",
    "usuario": "gatito.anime",
    "personagem": 16
+  },
+  {
+   "tipo": "novo_morador",
+   "quando": "2026-11-27T18:53:17+00:00",
+   "usuario": "renatabernardes9860"
   }
  ],
  "top1": "gatito.anime",
@@ -98,7 +119,8 @@
  ],
  "banco": {
   "gatito.anime": "20|{\"cama\": 1, \"planta\": 1}|2966effa|None",
-  "brunoleaod": "10|{\"cama\": 1}|562273a9|None"
+  "brunoleaod": "10|{\"cama\": 1}|562273a9|None",
+  "renatabernardes9860": "10|{\"cama\": 1}|fe690773|None"
  },
  "dm_enviadas": {
   "gatito.anime": "2026-11-26T19:01:10+00:00"
