@@ -1,6 +1,6 @@
 # Edifício Aura — regras atuais
 
-_Gerado automaticamente a partir de motor/config.json em 28/11/2026 13:19 (horário de Brasília)._
+_Gerado automaticamente a partir de motor/config.json em 28/11/2026 13:29 (horário de Brasília)._
 _Use este texto nos vídeos explicativos: ele é igual ao que aparece no site._
 
 1. Comente AURA em qualquer post do @comenteaura e vire morador do Edifício Aura.
